@@ -41,7 +41,7 @@
   <!-- Top Executive Command Header -->
   <header class="app-header">
     <div class="header-left">
-      <button class="mobile-toggle-btn" id="mobile-toggle-btn" onclick="document.body.classList.toggle('sidebar-collapsed')" title="Toggle Menu">
+      <button class="mobile-toggle-btn" id="mobile-toggle-btn" onclick="document.body.classList.toggle('sidebar-open'); document.body.classList.toggle('sidebar-collapsed');" title="Toggle Menu">
         <i class="fa-solid fa-bars"></i>
       </button>
       <img src="assets/mvd_logo.png" alt="State Transport Authority Emblem" class="govt-emblem" onerror="this.style.display='none'">
@@ -1823,8 +1823,32 @@
           Use Built-in Sample Dataset
         </button>
       </div>
-    </div>
-  </div>
+  <!-- Sidebar Backdrop for Mobile Off-Canvas Drawer -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="document.body.classList.remove('sidebar-open'); document.body.classList.remove('sidebar-collapsed');"></div>
+
+  <!-- Mobile Bottom Touch Navigation Bar -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <button class="mobile-nav-btn active" data-view="dashboard" onclick="window.RTO_APP.navigateTo('dashboard')" title="Executive Dashboard">
+      <i class="fa-solid fa-chart-pie"></i>
+      <span>Overview</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="directory" onclick="window.RTO_APP.navigateTo('directory')" title="Office Directory">
+      <i class="fa-solid fa-building-flag"></i>
+      <span>Directory</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="map" onclick="window.RTO_APP.navigateTo('map')" title="GIS Test Grounds Map">
+      <i class="fa-solid fa-earth-asia"></i>
+      <span>Map</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="finances" onclick="window.RTO_APP.navigateTo('finances')" title="Financial Dues">
+      <i class="fa-solid fa-file-invoice-dollar"></i>
+      <span>Dues</span>
+    </button>
+    <button class="mobile-nav-btn" id="mobile-menu-toggle-btn" onclick="document.body.classList.toggle('sidebar-open'); document.body.classList.toggle('sidebar-collapsed');" title="All Modules">
+      <i class="fa-solid fa-bars"></i>
+      <span>Menu</span>
+    </button>
+  </nav>
 
   <!-- Third-party CDN Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

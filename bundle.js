@@ -9058,6 +9058,15 @@ class RTOApp {
     this.updateBreadcrumbs();
     this.renderCurrentView();
 
+    // Close mobile sidebar drawer if open
+    document.body.classList.remove('sidebar-open');
+    document.body.classList.remove('sidebar-collapsed');
+
+    // Update mobile bottom nav active button
+    document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === viewId);
+    });
+
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
