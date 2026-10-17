@@ -1068,9 +1068,13 @@ class SupabaseService {
     }
 
     this.channel = this.client
-      .channel('public:rto_offices')
+      .channel('public:db_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: this.config.tableName }, async (payload) => {
-        console.log('⚡ Supabase Realtime Change Detected:', payload.eventType);
+        console.log('⚡ Supabase Realtime Change on rto_offices:', payload.eventType);
+        await this.loadData(true);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mvd_it_equipment' }, async (payload) => {
+        console.log('⚡ Supabase Realtime Change on mvd_it_equipment:', payload.eventType);
         await this.loadData(true);
       })
       .subscribe((status) => {
@@ -1127,63 +1131,89 @@ class SupabaseService {
     }
 
     try {
-      const { data, error } = await this.client
-        .from(this.config.tableName)
-        .select('*')
-        .order('district', { ascending: true })
-        .order('office_name', { ascending: true });
+      // Fetch both rto_offices and mvd_it_equipment in parallel
+      const [officesRes, itRes] = await Promise.all([
+        this.client
+          .from(this.config.tableName)
+          .select('*')
+          .order('district', { ascending: true })
+          .order('office_name', { ascending: true }),
+        this.client
+          .from('mvd_it_equipment')
+          .select('*')
+      ]);
 
-      if (error) {
-        throw new Error(error.message);
+      if (officesRes.error) {
+        throw new Error(officesRes.error.message);
       }
 
+      const data = officesRes.data;
       if (!data || data.length === 0) {
         throw new Error('No records returned from Supabase rto_offices table.');
       }
 
+      const itItems = itRes.data || [];
+      this.itEquipmentData = itItems;
+
       // Convert Supabase rows to typed OfficeRecord
       const transformedRecords = data.map((row, idx) => {
-        // If raw_payload is stored, we can feed it into DataAdapter
-        if (row.raw_payload && Object.keys(row.raw_payload).length > 0) {
-          const rec = DataAdapter.transformRow(row.raw_payload, idx);
-          rec.id = row.id;
-          rec.customFields = row.custom_fields || {};
-          if (row.office_name) rec.officeName = row.office_name;
-          if (row.district) rec.district = row.district;
-          if (row.building_type) rec.buildingType = row.building_type;
-          if (row.year_of_functioning) rec.yearOfFunctioning = row.year_of_functioning;
-          if (row.total_office_area !== undefined && row.total_office_area !== null) rec.totalArea = parseFloat(row.total_office_area);
-          if (row.rto_name) rec.rtoName = row.rto_name;
-          if (row.rto_mobile) rec.rtoMobile = row.rto_mobile;
-          if (row.jrto_name) rec.jrtoName = row.jrto_name;
-          if (row.jrto_mobile) rec.jrtoMobile = row.jrto_mobile;
-          if (row.rent_dues_amount !== undefined && row.rent_dues_amount !== null) rec.rentDues = parseFloat(row.rent_dues_amount);
-          if (row.repair_dues_amount !== undefined && row.repair_dues_amount !== null) rec.repairDues = parseFloat(row.repair_dues_amount);
-          if (row.fuel_dues_amount !== undefined && row.fuel_dues_amount !== null) rec.fuelDues = parseFloat(row.fuel_dues_amount);
-          rec.totalFinancialDues = (rec.rentDues || 0) + (rec.repairDues || 0) + (rec.fuelDues || 0) + (rec.otherExpensesAmount || 0);
-          return rec;
+        // Direct GPS extraction from Supabase table columns (Single Source of Truth)
+        let officeGps;
+        const oLat = parseFloat(row.office_latitude);
+        const oLng = parseFloat(row.office_longitude);
+        if (!isNaN(oLat) && !isNaN(oLng) && oLat >= -90 && oLat <= 90 && oLng >= -180 && oLng <= 180) {
+          officeGps = {
+            valid: true,
+            lat: oLat,
+            lng: oLng,
+            raw: row.office_gps_raw || `${oLat}, ${oLng}`,
+            mapsUrl: (row.office_gps_raw && row.office_gps_raw.startsWith('http')) 
+              ? row.office_gps_raw 
+              : `https://www.google.com/maps?q=${oLat},${oLng}`
+          };
+        } else {
+          officeGps = DataAdapter.extractCoordinates(row.office_gps_raw);
         }
 
-        // Direct mapping from Supabase Postgres schema
-        const officeGps = DataAdapter.extractCoordinates(
-          (row.office_latitude && row.office_longitude) 
-            ? `${row.office_latitude}, ${row.office_longitude}` 
-            : row.office_gps_raw
-        );
+        // DL Ground 1 GPS
+        let dlGps1;
+        const dlLat = parseFloat(row.dl_gps_1_lat);
+        const dlLng = parseFloat(row.dl_gps_1_lng);
+        if (!isNaN(dlLat) && !isNaN(dlLng) && dlLat >= -90 && dlLat <= 90 && dlLng >= -180 && dlLng <= 180) {
+          dlGps1 = {
+            valid: true,
+            lat: dlLat,
+            lng: dlLng,
+            raw: row.dl_gps_1_raw || `${dlLat}, ${dlLng}`,
+            mapsUrl: (row.dl_gps_1_raw && row.dl_gps_1_raw.startsWith('http')) 
+              ? row.dl_gps_1_raw 
+              : `https://www.google.com/maps?q=${dlLat},${dlLng}`
+          };
+        } else {
+          dlGps1 = DataAdapter.extractCoordinates(row.dl_gps_1_raw);
+        }
 
-        const dlGps1 = DataAdapter.extractCoordinates(
-          (row.dl_gps_1_lat && row.dl_gps_1_lng) 
-            ? `${row.dl_gps_1_lat}, ${row.dl_gps_1_lng}` 
-            : row.dl_gps_1_raw
-        );
         const dlGps2 = DataAdapter.extractCoordinates(row.dl_gps_2_raw);
         const dlGps3 = DataAdapter.extractCoordinates(row.dl_gps_3_raw);
 
-        const cfGps1 = DataAdapter.extractCoordinates(
-          (row.cf_gps_1_lat && row.cf_gps_1_lng) 
-            ? `${row.cf_gps_1_lat}, ${row.cf_gps_1_lng}` 
-            : row.cf_gps_1_raw
-        );
+        // CF Ground 1 GPS
+        let cfGps1;
+        const cfLat = parseFloat(row.cf_gps_1_lat);
+        const cfLng = parseFloat(row.cf_gps_1_lng);
+        if (!isNaN(cfLat) && !isNaN(cfLng) && cfLat >= -90 && cfLat <= 90 && cfLng >= -180 && cfLng <= 180) {
+          cfGps1 = {
+            valid: true,
+            lat: cfLat,
+            lng: cfLng,
+            raw: row.cf_gps_1_raw || `${cfLat}, ${cfLng}`,
+            mapsUrl: (row.cf_gps_1_raw && row.cf_gps_1_raw.startsWith('http')) 
+              ? row.cf_gps_1_raw 
+              : `https://www.google.com/maps?q=${cfLat},${cfLng}`
+          };
+        } else {
+          cfGps1 = DataAdapter.extractCoordinates(row.cf_gps_1_raw);
+        }
+
         const cfGps2 = DataAdapter.extractCoordinates(row.cf_gps_2_raw);
         const cfGps3 = DataAdapter.extractCoordinates(row.cf_gps_3_raw);
 
@@ -1212,6 +1242,9 @@ class SupabaseService {
         const fuelDues = parseFloat(row.fuel_dues_amount || 0);
         const otherExpensesAmount = parseFloat(row.other_expenses_amount || 0);
         const totalFinancialDues = rentDues + repairDues + fuelDues + otherExpensesAmount;
+
+        // Match IT equipment record
+        const itMatch = this.matchOfficeToIt(row, itItems);
 
         const record = {
           id: row.id || `office-${idx + 1}`,
@@ -1300,7 +1333,19 @@ class SupabaseService {
           hasStaffShortage: staffAvailabilityPercent < 75 || ((row.mvi_sanctioned || 0) - (row.mvi_available || 0) > 1),
           hasFinancialDues: totalFinancialDues > 0,
           hasOldVehicles: vehiclesOver10Years > 0,
-          isRented: (row.building_type || '').toLowerCase().includes('rent')
+          isRented: (row.building_type || '').toLowerCase().includes('rent'),
+          customFields: row.custom_fields || {},
+          // IT Equipment Inventory Data
+          itInventory: itMatch || null,
+          itTotalComputers: itMatch ? ((itMatch.cpu_working || 0) + (itMatch.aio_working || 0)) : 0,
+          itFaultyComputers: itMatch ? ((itMatch.cpu_not_working || 0) + (itMatch.aio_not_working || 0)) : 0,
+          itMonitors: itMatch ? (itMatch.monitors_working || 0) : 0,
+          itLaptops: itMatch ? (itMatch.laptops_working || 0) : 0,
+          itUpsWorking: itMatch ? (itMatch.ups_working || 0) : 0,
+          itUpsFaulty: itMatch ? (itMatch.ups_not_working || 0) : 0,
+          itNetworkProvider: itMatch ? (itMatch.network_provider || 'Not Specified') : 'Pending Survey',
+          itNetworkSpeed: itMatch ? (itMatch.network_speed || 'N/A') : 'N/A',
+          itOldSystems: itMatch ? (itMatch.systems_above_8yrs || 0) : 0
         };
 
         record.healthScore = DataAdapter.calculateHealthScore(record);
@@ -1334,6 +1379,122 @@ class SupabaseService {
         data: this.currentData || []
       };
     }
+  }
+
+  /**
+   * Intelligently match an RTO office with its corresponding IT inventory record
+   */
+  matchOfficeToIt(office, itList = []) {
+    if (!itList || itList.length === 0) return null;
+    const oName = (office.office_name || '').toLowerCase();
+    const oDist = (office.district || '').toLowerCase();
+    const isEnforcement = oName.includes('enforcement');
+
+    // 1. Enforcement Offices
+    if (isEnforcement) {
+      const match = itList.find(it => {
+        const itId = (it.id || '').toLowerCase();
+        const itName = (it.office_name || '').toLowerCase();
+        return (itId.includes('enforcement') || itName.includes('enforcement')) && 
+               (itName.includes(oDist) || itId.includes(oDist));
+      });
+      if (match) return match;
+    }
+
+    // 2. KL Code Matching (KL02, KL57, etc.)
+    const klMatch = oName.match(/kl\s*(\d+)/i);
+    if (klMatch) {
+      const klNum = parseInt(klMatch[1], 10);
+      const klPadded = 'kl' + (klNum < 10 ? '0' + klNum : klNum);
+      const match = itList.find(it => {
+        const itId = (it.id || '').toLowerCase();
+        const itName = (it.office_name || '').toLowerCase();
+        return (itId.startsWith(klPadded + '_') || itName.startsWith(klPadded.toUpperCase() + ' ') || itName.startsWith(klPadded + ' '));
+      });
+      if (match) return match;
+    }
+
+    // 3. DTC Offices (DTC Central Zone I, etc.)
+    if (oName.includes('dtc')) {
+      const match = itList.find(it => {
+        const itId = (it.id || '').toLowerCase();
+        const itName = (it.office_name || '').toLowerCase();
+        if (oName.includes('central zone i') && (itId.includes('cz_i') || itName.includes('cz i'))) return true;
+        if (oName.includes('central zone ii') && (itId.includes('cz_ii') || itName.includes('cz ii'))) return true;
+        if (oName.includes('south zone') && (itId.includes('sz') || itName.includes('sz'))) return true;
+        if (oName.includes('north zone') && (itId.includes('nz') || itName.includes('nz'))) return true;
+        return itName.includes(oDist) || itId.includes(oDist);
+      });
+      if (match) return match;
+    }
+
+    // 4. Fuzzy fallback matching on location keyword
+    const cleanTokens = oName.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(t => t.length > 3 && !['sub', 'rto', 'office'].includes(t));
+    for (const token of cleanTokens) {
+      const match = itList.find(it => {
+        const target = (it.id + ' ' + it.office_name).toLowerCase();
+        return target.includes(token);
+      });
+      if (match) return match;
+    }
+
+    return null;
+  }
+
+  /**
+   * Calculate Statewide IT Equipment Metrics
+   */
+  getItSummary() {
+    const list = this.currentData || [];
+    
+    let totalWorkingCpus = 0;
+    let totalFaultyCpus = 0;
+    let totalMonitors = 0;
+    let totalLaptops = 0;
+    let totalWorkingUps = 0;
+    let totalFaultyUps = 0;
+    let totalBatteriesInUse = 0;
+    let kswanCount = 0;
+    let bsnlCount = 0;
+    let otherNetCount = 0;
+    let totalOldSystems = 0;
+    let coveredOffices = 0;
+
+    list.forEach(o => {
+      if (o.itInventory) {
+        coveredOffices++;
+        const it = o.itInventory;
+        totalWorkingCpus += (it.cpu_working || 0) + (it.aio_working || 0);
+        totalFaultyCpus += (it.cpu_not_working || 0) + (it.aio_not_working || 0);
+        totalMonitors += (it.monitors_working || 0);
+        totalLaptops += (it.laptops_working || 0);
+        totalWorkingUps += (it.ups_working || 0);
+        totalFaultyUps += (it.ups_not_working || 0);
+        totalBatteriesInUse += (it.batteries_in_use || 0);
+        totalOldSystems += (it.systems_above_8yrs || 0);
+
+        const provider = (it.network_provider || '').toUpperCase();
+        if (provider.includes('KSWAN')) kswanCount++;
+        else if (provider.includes('BSNL')) bsnlCount++;
+        else if (provider) otherNetCount++;
+      }
+    });
+
+    return {
+      coveredOffices,
+      totalOffices: list.length,
+      totalWorkingCpus,
+      totalFaultyCpus,
+      totalMonitors,
+      totalLaptops,
+      totalWorkingUps,
+      totalFaultyUps,
+      totalBatteriesInUse,
+      kswanCount,
+      bsnlCount,
+      otherNetCount,
+      totalOldSystems
+    };
   }
 
   /**
@@ -3261,6 +3422,8 @@ class RTOApp {
       html += `<li class="breadcrumb-item active">Vehicle Fleet & Age Analysis</li>`;
     } else if (this.currentView === 'finances') {
       html += `<li class="breadcrumb-item active">Financial Dues & Pending Bills</li>`;
+    } else if (this.currentView === 'itinventory') {
+      html += `<li class="breadcrumb-item active">IT Inventory & Digital Assets</li>`;
     } else if (this.currentView === 'pendency') {
       html += `<li class="breadcrumb-item active">Critical Pendency & Remarks</li>`;
     } else if (this.currentView === 'comparison') {
@@ -3306,6 +3469,9 @@ class RTOApp {
       case 'finances':
         this.renderFinancesView();
         break;
+      case 'itinventory':
+        this.renderItInventoryView();
+        break;
       case 'pendency':
         this.renderPendencyView();
         break;
@@ -3341,6 +3507,24 @@ class RTOApp {
     this.setElText('kpi-old-vehicles', `${state.vehiclesOver10Years} (${state.vehiclesOver10YearsPercent}%)`);
     this.setElText('kpi-total-dues', DataAdapter.formatCurrency(state.totalFinancialDues));
     this.setElText('kpi-health-score', `${state.avgHealthScore}/100`);
+
+    // IT Workstation Assets
+    let itWorkingPcs = 0;
+    let itTotalPcs = 0;
+    let itFaultyPcs = 0;
+    this.filteredOffices.forEach(o => {
+      if (o.itInventory) {
+        const it = o.itInventory;
+        const w = (it.cpu_working || 0) + (it.aio_working || 0);
+        const nw = (it.cpu_not_working || 0) + (it.aio_not_working || 0);
+        itWorkingPcs += w;
+        itFaultyPcs += nw;
+        itTotalPcs += (w + nw);
+      }
+    });
+    this.setElText('kpi-it-working-pcs', itWorkingPcs.toLocaleString());
+    this.setElText('kpi-it-total-pcs', itTotalPcs.toLocaleString());
+    this.setElText('kpi-it-faulty-pcs', `${itFaultyPcs} Faulty`);
 
     // Health Score visual status
     const healthBadge = document.getElementById('kpi-health-status-badge');
@@ -3787,6 +3971,50 @@ class RTOApp {
 
     this.setElText('prof-other-expenses', o.otherExpenses || 'Nil');
     this.setElText('prof-total-dues', DataAdapter.formatCurrency(o.totalFinancialDues));
+
+    // Section G: IT & Digital Infrastructure
+    const it = o.itInventory;
+    const itBadge = document.getElementById('prof-it-status-badge');
+    if (it) {
+      if (itBadge) {
+        itBadge.className = 'badge badge-blue ml-auto';
+        itBadge.textContent = 'IT Survey Active';
+      }
+      const cpuWork = (it.cpu_working || 0) + (it.aio_working || 0);
+      const cpuFault = (it.cpu_not_working || 0) + (it.aio_not_working || 0);
+      this.setElText('prof-it-cpu', `${cpuWork} Working${cpuFault > 0 ? ` (${cpuFault} Faulty)` : ''}`);
+      
+      const monWork = it.monitors_working || 0;
+      const monFault = it.monitors_not_working || 0;
+      this.setElText('prof-it-monitors', `${monWork} Working${monFault > 0 ? ` (${monFault} Faulty)` : ''}`);
+
+      this.setElText('prof-it-laptops', `${it.laptops_working || 0} Units`);
+
+      const upsWork = it.ups_working || 0;
+      const upsFault = it.ups_not_working || 0;
+      const batt = it.batteries_in_use || 0;
+      this.setElText('prof-it-ups', `${upsWork} Working${upsFault > 0 ? ` (${upsFault} Faulty)` : ''} | ${batt} Batteries`);
+
+      this.setElText('prof-it-network', `${it.network_provider || 'Not Specified'} (${it.network_speed || 'Speed N/A'})`);
+
+      this.setElText('prof-it-age', `>8 Yrs: ${it.systems_above_8yrs || 0} | 5-8 Yrs: ${it.systems_5_to_8yrs || 0} | 3-5 Yrs: ${it.systems_3_to_5yrs || 0} | <3 Yrs: ${it.systems_below_3yrs || 0}`);
+
+      this.setElText('prof-it-officer', it.officer_in_charge || 'Not Appointed');
+      this.setElContact('prof-it-mobile', it.officer_mobile);
+    } else {
+      if (itBadge) {
+        itBadge.className = 'badge badge-warning ml-auto';
+        itBadge.textContent = 'Survey Pending';
+      }
+      this.setElText('prof-it-cpu', 'Survey Pending');
+      this.setElText('prof-it-monitors', '—');
+      this.setElText('prof-it-laptops', '—');
+      this.setElText('prof-it-ups', '—');
+      this.setElText('prof-it-network', 'Survey Pending');
+      this.setElText('prof-it-age', 'No IT survey data submitted for this office yet.');
+      this.setElText('prof-it-officer', '—');
+      this.setElText('prof-it-mobile', '—');
+    }
   }
 
   setElContact(id, phone) {
@@ -4007,6 +4235,239 @@ class RTOApp {
         </tr>
       `).join('');
     }
+  }
+
+  // ==========================================
+  // VIEW 9B: IT INVENTORY & ASSETS
+  // ==========================================
+  renderItInventoryView() {
+    let workingCpu = 0;
+    let faultyCpu = 0;
+    let totalMonitors = 0;
+    let totalLaptops = 0;
+    let workingUps = 0;
+    let faultyUps = 0;
+    let totalBatteries = 0;
+    let kswanCount = 0;
+    let bsnlCount = 0;
+    let otherNetCount = 0;
+
+    // Filter values
+    const searchVal = (document.getElementById('it-search-input')?.value || '').trim().toLowerCase();
+    const netFilter = document.getElementById('it-filter-network')?.value || 'all';
+    const healthFilter = document.getElementById('it-filter-health')?.value || 'all';
+
+    // Summary across all filtered offices
+    this.filteredOffices.forEach(o => {
+      if (o.itInventory) {
+        const it = o.itInventory;
+        workingCpu += (it.cpu_working || 0) + (it.aio_working || 0);
+        faultyCpu += (it.cpu_not_working || 0) + (it.aio_not_working || 0);
+        totalMonitors += (it.monitors_working || 0);
+        totalLaptops += (it.laptops_working || 0);
+        workingUps += (it.ups_working || 0);
+        faultyUps += (it.ups_not_working || 0);
+        totalBatteries += (it.batteries_in_use || 0);
+
+        const net = (it.network_provider || '').toUpperCase();
+        if (net.includes('KSWAN')) kswanCount++;
+        else if (net.includes('BSNL')) bsnlCount++;
+        else if (net) otherNetCount++;
+      }
+    });
+
+    this.setElText('it-kpi-working-cpu', workingCpu.toLocaleString());
+    this.setElText('it-kpi-faulty-cpu', `${faultyCpu} Faulty`);
+    this.setElText('it-kpi-monitors', totalMonitors.toLocaleString());
+    this.setElText('it-kpi-laptops', totalLaptops.toLocaleString());
+    this.setElText('it-kpi-working-ups', workingUps.toLocaleString());
+    this.setElText('it-kpi-batteries', totalBatteries.toLocaleString());
+    this.setElText('it-kpi-faulty-ups', `${faultyUps} Faulty`);
+    this.setElText('it-kpi-kswan', kswanCount.toLocaleString());
+    this.setElText('it-kpi-bsnl', bsnlCount.toLocaleString());
+    this.setElText('it-kpi-other-net', otherNetCount.toLocaleString());
+
+    // Filter table rows
+    const tbody = document.getElementById('it-inventory-tbody');
+    if (!tbody) return;
+
+    const displayRows = this.filteredOffices.filter(o => {
+      const it = o.itInventory;
+      // Search filter
+      if (searchVal) {
+        const matches = o.officeName.toLowerCase().includes(searchVal) ||
+          o.district.toLowerCase().includes(searchVal) ||
+          (it && (
+            (it.officer_in_charge || '').toLowerCase().includes(searchVal) ||
+            (it.network_provider || '').toLowerCase().includes(searchVal)
+          ));
+        if (!matches) return false;
+      }
+
+      // Network filter
+      if (netFilter !== 'all') {
+        if (!it) return false;
+        const net = (it.network_provider || '').toUpperCase();
+        if (netFilter === 'kswan' && !net.includes('KSWAN')) return false;
+        if (netFilter === 'bsnl' && !net.includes('BSNL')) return false;
+        if (netFilter === 'other' && (net.includes('KSWAN') || net.includes('BSNL'))) return false;
+      }
+
+      // Hardware health filter
+      if (healthFilter !== 'all') {
+        if (!it) return false;
+        const faulty = ((it.cpu_not_working || 0) + (it.aio_not_working || 0) + (it.ups_not_working || 0) + (it.monitors_not_working || 0));
+        const aged = (it.systems_above_8yrs || 0);
+        if (healthFilter === 'faulty' && faulty === 0) return false;
+        if (healthFilter === 'aged' && aged === 0) return false;
+        if (healthFilter === 'healthy' && (faulty > 0 || aged > 0)) return false;
+      }
+
+      return true;
+    });
+
+    if (displayRows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-muted">No offices match the selected IT filter criteria.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = displayRows.map(o => {
+      const it = o.itInventory;
+      if (!it) {
+        return `
+          <tr class="clickable-row" onclick="window.RTO_APP.openOfficeProfile('${o.id}')">
+            <td class="font-bold text-navy">${o.officeName}</td>
+            <td><span class="badge badge-subtle">${o.district}</span></td>
+            <td colspan="7" class="text-center text-muted text-xs">Survey record pending for this office</td>
+            <td>
+              <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); window.RTO_APP.openOfficeProfile('${o.id}')">
+                View Office
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+
+      const cpuWork = (it.cpu_working || 0) + (it.aio_working || 0);
+      const cpuFault = (it.cpu_not_working || 0) + (it.aio_not_working || 0);
+      const monWork = it.monitors_working || 0;
+      const monFault = it.monitors_not_working || 0;
+      const lapWork = it.laptops_working || 0;
+      const upsWork = it.ups_working || 0;
+      const upsFault = it.ups_not_working || 0;
+      const batt = it.batteries_in_use || 0;
+      const aged = it.systems_above_8yrs || 0;
+      const officer = it.officer_in_charge || 'N/A';
+      const phone = it.officer_mobile || '';
+
+      const netBadge = (it.network_provider || '').toUpperCase().includes('KSWAN') 
+        ? `<span class="badge badge-success">KSWAN</span> <span class="text-xs text-muted">${it.network_speed || ''}</span>`
+        : (it.network_provider || '').toUpperCase().includes('BSNL')
+          ? `<span class="badge badge-blue">BSNL</span> <span class="text-xs text-muted">${it.network_speed || ''}</span>`
+          : `<span class="badge badge-warning">${it.network_provider || 'Leased'}</span>`;
+
+      return `
+        <tr class="clickable-row" onclick="window.RTO_APP.openOfficeProfile('${o.id}')">
+          <td class="font-bold text-navy">${o.officeName}</td>
+          <td><span class="badge badge-subtle">${o.district}</span></td>
+          <td>
+            <span class="font-bold text-navy">${cpuWork}</span>
+            ${cpuFault > 0 ? `<span class="badge badge-danger text-xs ml-1">${cpuFault} Faulty</span>` : ''}
+          </td>
+          <td>
+            <span>${monWork}</span>
+            ${monFault > 0 ? `<span class="text-xs text-danger">(${monFault} F)</span>` : ''}
+          </td>
+          <td><span>${lapWork}</span></td>
+          <td>
+            <span class="font-semibold">${upsWork}</span>
+            ${upsFault > 0 ? `<span class="text-danger text-xs">(${upsFault} F)</span>` : ''}
+            <span class="text-xs text-muted block">${batt} Batt</span>
+          </td>
+          <td>${netBadge}</td>
+          <td>
+            ${aged > 0 ? `<span class="badge badge-danger font-bold">${aged} Units</span>` : `<span class="text-muted text-xs">0 (&lt;8 Yrs)</span>`}
+          </td>
+          <td class="text-xs">
+            <span class="font-semibold block">${officer}</span>
+            ${phone ? `<a href="tel:${phone}" class="tel-link" onclick="event.stopPropagation()">${phone}</a>` : ''}
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); window.RTO_APP.openOfficeProfile('${o.id}')">
+              View Office
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  exportItInventory() {
+    const rows = [
+      [
+        'Office Name',
+        'District',
+        'Working CPUs',
+        'Faulty CPUs',
+        'Monitors Working',
+        'Monitors Faulty',
+        'Laptops',
+        'UPS Working',
+        'UPS Faulty',
+        'Batteries in Use',
+        'Network Provider',
+        'Network Speed',
+        'Aged Systems (>8 Yrs)',
+        'Systems 5-8 Yrs',
+        'Systems 3-5 Yrs',
+        'Systems <3 Yrs',
+        'IT Nodal Officer',
+        'Nodal Officer Phone'
+      ]
+    ];
+
+    this.filteredOffices.forEach(o => {
+      const it = o.itInventory;
+      if (it) {
+        rows.push([
+          `"${(o.officeName || '').replace(/"/g, '""')}"`,
+          `"${(o.district || '').replace(/"/g, '""')}"`,
+          (it.cpu_working || 0) + (it.aio_working || 0),
+          (it.cpu_not_working || 0) + (it.aio_not_working || 0),
+          it.monitors_working || 0,
+          it.monitors_not_working || 0,
+          it.laptops_working || 0,
+          it.ups_working || 0,
+          it.ups_not_working || 0,
+          it.batteries_in_use || 0,
+          `"${(it.network_provider || '').replace(/"/g, '""')}"`,
+          `"${(it.network_speed || '').replace(/"/g, '""')}"`,
+          it.systems_above_8yrs || 0,
+          it.systems_5_to_8yrs || 0,
+          it.systems_3_to_5yrs || 0,
+          it.systems_below_3yrs || 0,
+          `"${(it.officer_in_charge || '').replace(/"/g, '""')}"`,
+          `"${(it.officer_mobile || '').replace(/"/g, '""')}"`
+        ]);
+      } else {
+        rows.push([
+          `"${(o.officeName || '').replace(/"/g, '""')}"`,
+          `"${(o.district || '').replace(/"/g, '""')}"`,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          '"Survey Pending"',
+          '""', 0, 0, 0, 0, '""', '""'
+        ]);
+      }
+    });
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(r => r.join(',')).join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Kerala_MVD_IT_Inventory_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   // ==========================================
@@ -4410,6 +4871,20 @@ class RTOApp {
     const resetBtn = document.getElementById('btn-reset-filters');
     if (resetBtn) {
       resetBtn.addEventListener('click', () => this.resetFilters());
+    }
+
+    // IT Inventory View Filters
+    const itSearch = document.getElementById('it-search-input');
+    if (itSearch) {
+      itSearch.addEventListener('input', () => this.renderItInventoryView());
+    }
+    const itNet = document.getElementById('it-filter-network');
+    if (itNet) {
+      itNet.addEventListener('change', () => this.renderItInventoryView());
+    }
+    const itHealth = document.getElementById('it-filter-health');
+    if (itHealth) {
+      itHealth.addEventListener('change', () => this.renderItInventoryView());
     }
 
     // Remarks Search input

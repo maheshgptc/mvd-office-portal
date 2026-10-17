@@ -135,6 +135,10 @@
           <i class="fa-solid fa-file-invoice-dollar"></i>
           <span>Financial Dues & Bills</span>
         </a>
+        <a href="#itinventory" class="sidebar-nav-item" data-view="itinventory">
+          <i class="fa-solid fa-server"></i>
+          <span>IT Inventory & Assets</span>
+        </a>
         <a href="#pendency" class="sidebar-nav-item" data-view="pendency">
           <i class="fa-solid fa-triangle-exclamation"></i>
           <span>Critical Pendency & Remarks</span>
@@ -344,6 +348,16 @@
               <span class="kpi-label">AVG OFFICE HEALTH SCORE</span>
               <div class="kpi-value text-primary" id="kpi-health-score">0/100</div>
               <span class="kpi-sub" id="kpi-health-status-badge">Calculating...</span>
+            </div>
+            <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+          </div>
+
+          <div class="kpi-card" onclick="window.RTO_APP.navigateTo('itinventory')">
+            <div class="kpi-icon bg-blue-subtle text-primary"><i class="fa-solid fa-server"></i></div>
+            <div class="kpi-content">
+              <span class="kpi-label">IT & WORKSTATIONS</span>
+              <div class="kpi-value"><span id="kpi-it-working-pcs">0</span> Working</div>
+              <span class="kpi-sub" id="kpi-it-sub"><span id="kpi-it-total-pcs">0</span> Total PCs | <span id="kpi-it-faulty-pcs" class="text-danger">0</span> Faulty</span>
             </div>
             <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           </div>
@@ -644,6 +658,42 @@
               <div class="info-kv-row mt-2 font-bold text-base" style="border-top: 1px solid #cbd5e1; padding-top: 8px;">
                 <span>Total Pending Dues</span>
                 <span class="text-danger" id="prof-total-dues">₹1,37,500</span>
+              </div>
+            </div>
+          <!-- IT & Computing Infrastructure Card -->
+          <div class="dossier-card" id="prof-it-card">
+            <div class="dossier-card-header">
+              <i class="fa-solid fa-server text-primary"></i>
+              <h3>IT & Digital Infrastructure</h3>
+              <span class="badge badge-blue ml-auto" id="prof-it-status-badge">IT Survey Active</span>
+            </div>
+            <div class="info-kv-list" id="prof-it-content">
+              <div class="info-kv-row">
+                <span class="kv-key">Workstation PCs (CPUs)</span>
+                <span class="kv-val font-bold" id="prof-it-cpu">0 Working</span>
+              </div>
+              <div class="info-kv-row">
+                <span class="kv-key">Monitors / Displays</span>
+                <span class="kv-val font-bold" id="prof-it-monitors">0 Working</span>
+              </div>
+              <div class="info-kv-row">
+                <span class="kv-key">Laptops & Inspection Units</span>
+                <span class="kv-val" id="prof-it-laptops">0 Units</span>
+              </div>
+              <div class="info-kv-row">
+                <span class="kv-key">Power & UPS Backup</span>
+                <span class="kv-val" id="prof-it-ups">0 Units</span>
+              </div>
+              <div class="info-kv-row">
+                <span class="kv-key">Network Connectivity</span>
+                <span class="kv-val font-bold text-primary" id="prof-it-network">KSWAN</span>
+              </div>
+              <div class="info-kv-row">
+                <span class="kv-key">Hardware Age Breakdown</span>
+                <span class="kv-val text-xs text-muted" id="prof-it-age">N/A</span>
+              </div>
+              <div class="info-kv-row text-xs text-muted" id="prof-it-officer-row" style="border-top: 1px dashed #cbd5e1; padding-top: 6px;">
+                <span>IT Nodal Officer: <span class="font-semibold text-navy" id="prof-it-officer">Name</span> (<span id="prof-it-mobile">Phone</span>)</span>
               </div>
             </div>
           </div>
@@ -1059,6 +1109,114 @@
                 </tr>
               </thead>
               <tbody id="finances-ranking-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 9B: IT INVENTORY & DIGITAL ASSETS                   -->
+      <!-- ======================================================== -->
+      <section id="view-itinventory" class="app-view hidden">
+        <div class="section-header">
+          <div>
+            <h2>State-Wide IT Inventory & Digital Assets Registry</h2>
+            <p>Real-time survey of computing hardware, network connectivity, power backup systems, and equipment health across all MVD offices.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-outline" id="btn-export-it-inventory" onclick="window.RTO_APP.exportItInventory()">
+              <i class="fa-solid fa-file-csv"></i> Export IT Inventory CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- IT KPI Metrics -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon bg-blue-subtle text-primary"><i class="fa-solid fa-desktop"></i></div>
+            <div class="kpi-content">
+              <span class="kpi-label">TOTAL WORKSTATIONS</span>
+              <div class="kpi-value text-primary"><span id="it-kpi-working-cpu">0</span> Working</div>
+              <span class="kpi-sub"><span id="it-kpi-faulty-cpu" class="text-danger font-semibold">0</span> Faulty / Not Working</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon bg-indigo-subtle text-indigo"><i class="fa-solid fa-tv"></i></div>
+            <div class="kpi-content">
+              <span class="kpi-label">MONITORS & LAPTOPS</span>
+              <div class="kpi-value" id="it-kpi-monitors">0</div>
+              <span class="kpi-sub"><span id="it-kpi-laptops">0</span> Field Laptops in Service</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon bg-amber-subtle text-warning"><i class="fa-solid fa-battery-half"></i></div>
+            <div class="kpi-content">
+              <span class="kpi-label">UPS & POWER BACKUP</span>
+              <div class="kpi-value text-warning"><span id="it-kpi-working-ups">0</span> Working</div>
+              <span class="kpi-sub"><span id="it-kpi-batteries">0</span> Batteries | <span id="it-kpi-faulty-ups" class="text-danger font-semibold">0</span> Faulty UPS</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon bg-emerald-subtle text-success"><i class="fa-solid fa-network-wired"></i></div>
+            <div class="kpi-content">
+              <span class="kpi-label">NETWORK CONNECTIVITY</span>
+              <div class="kpi-value text-success"><span id="it-kpi-kswan">0</span> KSWAN</div>
+              <span class="kpi-sub"><span id="it-kpi-bsnl">0</span> BSNL | <span id="it-kpi-other-net">0</span> Other Links</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter bar for IT Register -->
+        <div class="filter-card mt-4">
+          <div class="filter-controls-grid">
+            <div class="filter-group">
+              <label for="it-search-input">Search Office or Code</label>
+              <input type="text" id="it-search-input" placeholder="Type KL code or office name..." style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 100%;">
+            </div>
+            <div class="filter-group">
+              <label for="it-filter-network">Network Provider</label>
+              <select id="it-filter-network">
+                <option value="all">All Providers</option>
+                <option value="kswan">KSWAN Connected</option>
+                <option value="bsnl">BSNL Connected</option>
+                <option value="other">Other / Leased</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="it-filter-health">Hardware Condition</label>
+              <select id="it-filter-health">
+                <option value="all">All Hardware Conditions</option>
+                <option value="faulty">Has Faulty Equipment</option>
+                <option value="aged">Has Systems &gt; 8 Yrs Old</option>
+                <option value="healthy">All Systems Operational</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- IT Inventory Table -->
+        <div class="table-card mt-4">
+          <div class="table-card-header">
+            <h4>Office-Wise IT & Digital Hardware Register</h4>
+            <span class="text-xs text-muted">Direct sync with Supabase `mvd_it_equipment` table</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Office Name</th>
+                  <th>District</th>
+                  <th>Workstation CPUs</th>
+                  <th>Monitors</th>
+                  <th>Laptops</th>
+                  <th>UPS & Battery</th>
+                  <th>Network Link</th>
+                  <th>Aged Systems (&gt;8 Yrs)</th>
+                  <th>IT Nodal Officer</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="it-inventory-tbody"></tbody>
             </table>
           </div>
         </div>
