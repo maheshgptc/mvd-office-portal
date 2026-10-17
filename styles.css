@@ -1698,78 +1698,476 @@ body {
 }
 
 /* ==========================================================================
-   RESPONSIVE DESIGN BREAKPOINTS
+   MOBILE & RESPONSIVE DESIGN SYSTEM
+   Supports Mobile (320px-480px), Phablets/Tablets (481px-992px), Desktop (993px+)
    ========================================================================== */
-@media (max-width: 1024px) {
-  .app-sidebar {
-    position: fixed;
-    left: 0;
-    top: var(--header-height);
-    bottom: 0;
-    z-index: 99;
-    transform: translateX(-100%);
-  }
 
-  body.sidebar-collapsed .app-sidebar {
-    transform: translateX(0);
+/* Mobile Bottom Navigation Bar (Hidden on Desktop) */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--navy-900);
+  border-top: 2px solid var(--navy-700);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.35);
+  z-index: 950;
+  padding: 0 4px;
+  align-items: center;
+  justify-content: space-around;
+  backdrop-filter: blur(12px);
+}
+
+.mobile-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--slate-400);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex: 1;
+  max-width: 72px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-btn i {
+  font-size: 1.125rem;
+}
+
+.mobile-nav-btn:hover {
+  color: var(--slate-200);
+}
+
+.mobile-nav-btn.active {
+  color: var(--gold-400);
+}
+
+.mobile-nav-btn.active i {
+  transform: translateY(-1px);
+}
+
+/* Sidebar Backdrop for Mobile Drawer */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 17, 40, 0.7);
+  backdrop-filter: blur(3px);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+body.sidebar-open .sidebar-backdrop,
+body.sidebar-collapsed .sidebar-backdrop {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --- TABLETS & SMALL DESKTOPS (<= 992px) --- */
+@media (max-width: 992px) {
+  .app-header {
+    height: 64px;
+    padding: 0 14px;
   }
 
   .mobile-toggle-btn {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.08);
   }
 
-  .charts-dual-grid {
-    grid-template-columns: 1fr;
+  .mobile-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
   }
 
-  .fin-dossier-grid {
-    grid-template-columns: 1fr;
+  /* Off-canvas Sidebar Drawer */
+  .app-sidebar {
+    position: fixed;
+    left: -290px;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 1001;
+    overflow-y: auto;
+    box-shadow: none;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body.sidebar-open .app-sidebar,
+  body.sidebar-collapsed .app-sidebar {
+    left: 0;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .app-main {
+    padding: 16px 16px 80px 16px;
+    max-width: 100vw;
+  }
+
+  .mobile-bottom-nav {
+    display: flex;
+  }
+
+  .charts-dual-grid,
+  .fin-dossier-grid,
+  .districts-grid,
+  .profile-details-grid,
+  .pendency-cards-grid,
+  .reports-action-grid,
+  .admin-workbench-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
+/* --- SMARTPHONES & PHABLETS (<= 768px) --- */
 @media (max-width: 768px) {
+  :root {
+    --header-height: 58px;
+  }
+
   .app-header {
-    padding: 0 16px;
+    height: var(--header-height);
+    padding: 0 12px;
+  }
+
+  .header-left {
+    gap: 10px;
+  }
+
+  .govt-emblem {
+    height: 34px;
+  }
+
+  .header-titles .govt-subhead {
+    display: none;
   }
 
   .header-titles .govt-head {
-    font-size: 0.9375rem;
+    font-size: 0.775rem;
+    line-height: 1.25;
+    max-width: 200px;
   }
 
   .sync-meta {
     display: none;
   }
 
-  .app-main {
-    padding: 16px;
+  .sync-status-box {
+    margin-right: 4px;
   }
 
+  #connection-status-badge {
+    padding: 3px 7px;
+    font-size: 0.7rem;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .header-actions .btn {
+    padding: 6px 9px;
+    font-size: 0.75rem;
+  }
+
+  .header-actions .btn span {
+    display: none;
+  }
+
+  .header-actions .btn i {
+    margin: 0;
+  }
+
+  .admin-session-pill {
+    padding: 3px 6px;
+  }
+
+  .admin-user-name {
+    display: none;
+  }
+
+  /* Sub Bar & Search */
   .app-sub-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .breadcrumb-list {
+    font-size: 0.75rem;
   }
 
   .quick-search-box {
     width: 100%;
   }
 
-  .kpi-grid {
-    grid-template-columns: 1fr 1fr;
+  .quick-search-box input {
+    font-size: 0.875rem;
+    padding: 9px 12px 9px 36px;
   }
 
+  /* Filter Panel */
+  .filter-panel {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .filter-panel-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+
+  .filter-title {
+    font-size: 0.7rem;
+  }
+
+  .filter-controls-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .filter-group label {
+    font-size: 0.7rem;
+  }
+
+  .filter-group select {
+    font-size: 0.8125rem;
+    padding: 7px 8px;
+    min-height: 38px;
+  }
+
+  .filter-toggles-row {
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .toggle-chip .chip-label {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
+
+  /* KPI Grid */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .kpi-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .kpi-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .kpi-label {
+    font-size: 0.625rem;
+  }
+
+  .kpi-value {
+    font-size: 1.15rem;
+  }
+
+  .kpi-sub {
+    font-size: 0.6875rem;
+  }
+
+  .kpi-arrow {
+    display: none;
+  }
+
+  /* Tables & Responsive Scrolling */
+  .table-card {
+    border-radius: var(--radius-sm);
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-sm);
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .table-pagination-footer {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+    padding: 12px;
+  }
+
+  /* Profile View */
   .profile-header-banner {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .profile-banner-left {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
   }
 
   .profile-banner-right {
-    align-items: flex-start;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .profile-action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .profile-action-buttons .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Interactive Map */
+  .map-container {
+    height: 340px !important;
+  }
+
+  .map-view-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .map-legend-bar {
+    overflow-x: auto;
+    padding-bottom: 4px;
+    flex-wrap: nowrap;
+  }
+
+  /* Modals on Mobile */
+  .modal-overlay {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .modal-card,
+  .modal-dialog,
+  .modal-xl {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 88vh;
+    border-radius: 16px 16px 0 0;
+    margin: 0;
+  }
+
+  .modal-header {
+    padding: 14px 16px;
+  }
+
+  .modal-body {
+    padding: 14px 16px;
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modal-tabs-bar {
+    padding: 0 8px;
+  }
+
+  .modal-tab-btn {
+    padding: 10px 12px;
+    font-size: 0.775rem;
+  }
+
+  .form-dynamic-grid .col-6,
+  .form-dynamic-grid .col-4,
+  .form-dynamic-grid .col-3 {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px !important; /* Prevents auto-zoom in iOS Safari */
+    min-height: 42px;
   }
 }
 
+/* --- SMALL MOBILE PHONES (<= 480px) --- */
 @media (max-width: 480px) {
+  .header-titles .govt-head {
+    font-size: 0.725rem;
+    max-width: 160px;
+  }
+
   .kpi-grid {
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .filter-controls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-action-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .dossier-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .dossier-actions .btn {
+    width: 100%;
   }
 }
 
