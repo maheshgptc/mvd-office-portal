@@ -269,6 +269,8 @@ class SupabaseService {
         const itMatch = this.matchOfficeToIt(row, itItems);
 
         const record = {
+          ...row,
+          rawRow: { ...row },
           id: row.id || `office-${idx + 1}`,
           index: idx + 1,
           timestamp: row.timestamp || '',

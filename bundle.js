@@ -247,13 +247,648 @@ const TABLE_COLUMN_GROUPS = [
   }
 ];
 
+
+// ============================================================================
+// FULL SCHEMA FOR ADMIN EDIT MODAL (All 69 Non-Excluded Supabase Columns)
+// ============================================================================
+const RTO_OFFICE_EDIT_SCHEMA = [
+  {
+    id: 'mod_basic',
+    name: 'Basic Office Details & Officers',
+    icon: 'fa-building',
+    sections: [
+      {
+        id: 'sec_basic_info',
+        name: 'Primary Office Information',
+        icon: 'fa-id-card',
+        fields: [
+          {
+            key: 'office_name',
+            label: 'Office Name',
+            type: 'office_select',
+            grid: 'col-6',
+            required: true,
+            help: 'Switch office to edit, or select office name'
+          },
+          {
+            key: 'district',
+            label: 'District',
+            type: 'district_select',
+            grid: 'col-6',
+            required: true,
+            help: 'Administrative District in Kerala'
+          },
+          {
+            key: 'year_of_functioning',
+            label: 'Year of Functioning (Est.)',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'e.g. 1985'
+          },
+          {
+            key: 'building_type',
+            label: 'Building Type',
+            type: 'select',
+            grid: 'col-4',
+            options: ['Government Building', 'Rented Building', 'Other']
+          },
+          {
+            key: 'total_office_area',
+            label: 'Total Office Area (Sq Ft)',
+            type: 'number',
+            grid: 'col-4',
+            placeholder: 'e.g. 4500'
+          }
+        ]
+      },
+      {
+        id: 'sec_office_geo',
+        name: 'Office Geo-Location & GPS Coordinates',
+        icon: 'fa-map-location-dot',
+        fields: [
+          {
+            key: 'office_gps_raw',
+            label: 'Office GPS Coordinates (Raw / Maps Link)',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'e.g. 8.5061, 76.9558 or Google Maps URL'
+          },
+          {
+            key: 'office_latitude',
+            label: 'Office Latitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: 'e.g. 8.5061'
+          },
+          {
+            key: 'office_longitude',
+            label: 'Office Longitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: 'e.g. 76.9558'
+          }
+        ]
+      },
+      {
+        id: 'sec_officers',
+        name: 'Key Officers & Contact Information',
+        icon: 'fa-user-tie',
+        fields: [
+          {
+            key: 'dtc_name',
+            label: 'Deputy Transport Commissioner (DTC)',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Officer Name'
+          },
+          {
+            key: 'dtc_mobile',
+            label: 'DTC Mobile Number',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Mobile / WhatsApp'
+          },
+          {
+            key: 'rto_name',
+            label: 'RTO / Office In-Charge Name',
+            type: 'text',
+            grid: 'col-5',
+            placeholder: 'Officer Name'
+          },
+          {
+            key: 'rto_mobile',
+            label: 'RTO Mobile Number',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'Mobile Number'
+          },
+          {
+            key: 'rto_available',
+            label: 'RTO In-Position / Present',
+            type: 'boolean',
+            grid: 'col-3',
+            help: 'Currently deployed & present'
+          },
+          {
+            key: 'jrto_name',
+            label: 'Joint RTO Name',
+            type: 'text',
+            grid: 'col-5',
+            placeholder: 'Officer Name'
+          },
+          {
+            key: 'jrto_mobile',
+            label: 'Joint RTO Mobile Number',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'Mobile Number'
+          },
+          {
+            key: 'jrto_available',
+            label: 'Joint RTO In-Position / Present',
+            type: 'boolean',
+            grid: 'col-3',
+            help: 'Currently deployed & present'
+          },
+          {
+            key: 'landline_pro',
+            label: 'Office Landline / Public Relations (PRO)',
+            type: 'text',
+            grid: 'col-12',
+            placeholder: 'e.g. 0471-2333333'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mod_manpower',
+    name: 'Manpower & Staff Cadres',
+    icon: 'fa-users-gear',
+    sections: [
+      {
+        id: 'sec_executive_cadre',
+        name: 'Executive Cadre (MVI & AMVI)',
+        icon: 'fa-shield-halved',
+        fields: [
+          {
+            key: 'mvi_sanctioned',
+            label: 'Motor Vehicle Inspector (MVI) Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'mvi_available',
+            label: 'MVI Available (In Position)',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'amvi_sanctioned',
+            label: 'Assistant MVI (AMVI) Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'amvi_available',
+            label: 'AMVI Available (In Position)',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          }
+        ]
+      },
+      {
+        id: 'sec_supervisory_cadre',
+        name: 'Supervisory & Ministerial Staff',
+        icon: 'fa-user-group',
+        fields: [
+          {
+            key: 'ss_sanctioned',
+            label: 'Senior Superintendent Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'ss_available',
+            label: 'Senior Superintendent Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'js_sanctioned',
+            label: 'Junior Superintendent Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'js_available',
+            label: 'Junior Superintendent Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'ha_pro_sanctioned',
+            label: 'Head Clerk / HA / PRO Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'ha_pro_available',
+            label: 'Head Clerk / HA / PRO Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'clerk_sanctioned',
+            label: 'Senior / Junior Clerks Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'clerk_available',
+            label: 'Senior / Junior Clerks Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          }
+        ]
+      },
+      {
+        id: 'sec_support_cadre',
+        name: 'Support & Ancillary Staff',
+        icon: 'fa-handshake-angle',
+        fields: [
+          {
+            key: 'driver_sanctioned',
+            label: 'Driver Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'driver_available',
+            label: 'Driver Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'oa_sanctioned',
+            label: 'Office Attendants (OA) Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'oa_available',
+            label: 'Office Attendants (OA) Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'pts_available',
+            label: 'Part-Time Sweepers (PTS) Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'other_staff_details',
+            label: 'Other Staff / Deputation / Contract Details',
+            type: 'textarea',
+            grid: 'col-9',
+            placeholder: 'Any additional staff, casual workers, or special arrangements...'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mod_grounds',
+    name: 'Infrastructure & Test Grounds',
+    icon: 'fa-road',
+    sections: [
+      {
+        id: 'sec_grounds_overview',
+        name: 'Ground Ownership & Testing Schedule',
+        icon: 'fa-calendar-days',
+        fields: [
+          {
+            key: 'has_own_ground',
+            label: 'Has Own Dedicated Testing Ground',
+            type: 'boolean',
+            grid: 'col-4',
+            help: 'Check if office owns dedicated ground facility'
+          },
+          {
+            key: 'dl_days',
+            label: 'Driving License (DL) Test Days',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'e.g. Mon, Wed, Fri'
+          },
+          {
+            key: 'cf_days',
+            label: 'Certificate of Fitness (CF) Test Days',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'e.g. Tue, Thu, Sat'
+          },
+          {
+            key: 'dl_grounds_count',
+            label: 'DL Grounds Count',
+            type: 'number',
+            grid: 'col-6',
+            placeholder: '1'
+          },
+          {
+            key: 'cf_grounds_count',
+            label: 'CF Grounds Count',
+            type: 'number',
+            grid: 'col-6',
+            placeholder: '1'
+          }
+        ]
+      },
+      {
+        id: 'sec_dl_grounds',
+        name: 'Driving License (DL) Ground Coordinates',
+        icon: 'fa-location-dot',
+        fields: [
+          {
+            key: 'dl_gps_1_raw',
+            label: 'DL Ground 1 GPS Coordinates (Raw / URL)',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'e.g. 8.5201, 76.9402'
+          },
+          {
+            key: 'dl_gps_1_lat',
+            label: 'DL Ground 1 Latitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '8.5201'
+          },
+          {
+            key: 'dl_gps_1_lng',
+            label: 'DL Ground 1 Longitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '76.9402'
+          },
+          {
+            key: 'dl_gps_2_raw',
+            label: 'DL Ground 2 GPS Coordinates',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Alternate DL test location...'
+          },
+          {
+            key: 'dl_gps_3_raw',
+            label: 'DL Ground 3 GPS Coordinates',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Tertiary DL test location...'
+          }
+        ]
+      },
+      {
+        id: 'sec_cf_grounds',
+        name: 'Certificate of Fitness (CF) Ground Coordinates',
+        icon: 'fa-truck-ramp-box',
+        fields: [
+          {
+            key: 'cf_gps_1_raw',
+            label: 'CF Ground 1 GPS Coordinates (Raw / URL)',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'e.g. 8.5301, 76.9350'
+          },
+          {
+            key: 'cf_gps_1_lat',
+            label: 'CF Ground 1 Latitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '8.5301'
+          },
+          {
+            key: 'cf_gps_1_lng',
+            label: 'CF Ground 1 Longitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '76.9350'
+          },
+          {
+            key: 'cf_gps_2_raw',
+            label: 'CF Ground 2 GPS Coordinates',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Alternate CF ground...'
+          },
+          {
+            key: 'cf_gps_3_raw',
+            label: 'CF Ground 3 GPS Coordinates',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Tertiary CF ground...'
+          },
+          {
+            key: 'cf_other_location_details',
+            label: 'Other Testing Location / Ground Lease Details',
+            type: 'textarea',
+            grid: 'col-12',
+            placeholder: 'Notes on leased grounds, local body permissions, or facilities...'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mod_fleet',
+    name: 'Vehicle Fleet & Mobility',
+    icon: 'fa-car-side',
+    sections: [
+      {
+        id: 'sec_fleet_types',
+        name: 'Fleet Composition by Fuel Type',
+        icon: 'fa-gas-pump',
+        fields: [
+          {
+            key: 'vehicles_diesel',
+            label: 'Diesel Department Vehicles',
+            type: 'number',
+            grid: 'col-4',
+            placeholder: '0'
+          },
+          {
+            key: 'vehicles_petrol',
+            label: 'Petrol Department Vehicles',
+            type: 'number',
+            grid: 'col-4',
+            placeholder: '0'
+          },
+          {
+            key: 'vehicles_electric',
+            label: 'Electric Vehicles (EV)',
+            type: 'number',
+            grid: 'col-4',
+            placeholder: '0'
+          }
+        ]
+      },
+      {
+        id: 'sec_aged_fleet',
+        name: 'Aged Fleet Compliance & Condemnation',
+        icon: 'fa-triangle-exclamation',
+        fields: [
+          {
+            key: 'vehicles_over_10_years',
+            label: 'Vehicles Over 10 Years in Active Duty',
+            type: 'number',
+            grid: 'col-6',
+            placeholder: '0',
+            help: 'Subject to scrapping/condemnation audit under green protocol'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mod_finance',
+    name: 'Financial Liabilities & Dues',
+    icon: 'fa-receipt',
+    sections: [
+      {
+        id: 'sec_rent_dues',
+        name: 'Office Rent Liabilities',
+        icon: 'fa-house-lock',
+        fields: [
+          {
+            key: 'rent_dues_amount',
+            label: 'Pending Rent Amount (₹)',
+            type: 'currency',
+            grid: 'col-3',
+            placeholder: '0.00'
+          },
+          {
+            key: 'rent_due_from',
+            label: 'Rent Due From Period',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. April 2023'
+          },
+          {
+            key: 'rent_submitted_on',
+            label: 'Rent Bill Submitted On',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. 15/01/2024'
+          },
+          {
+            key: 'rent_remarks',
+            label: 'Rent Remarks / Notes',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'Landlord / building remarks'
+          }
+        ]
+      },
+      {
+        id: 'sec_repair_dues',
+        name: 'Vehicle Maintenance & Repair Dues',
+        icon: 'fa-wrench',
+        fields: [
+          {
+            key: 'repair_dues_amount',
+            label: 'Pending Repair Dues (₹)',
+            type: 'currency',
+            grid: 'col-3',
+            placeholder: '0.00'
+          },
+          {
+            key: 'repair_due_from',
+            label: 'Repair Due From Period',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. Oct 2023'
+          },
+          {
+            key: 'repair_submitted_on',
+            label: 'Repair Bill Submitted On',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. 20/02/2024'
+          },
+          {
+            key: 'repair_remarks',
+            label: 'Repair Remarks / Workshop Details',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'Authorised workshop / invoice notes'
+          }
+        ]
+      },
+      {
+        id: 'sec_fuel_dues',
+        name: 'Fuel Liabilities & Arrears',
+        icon: 'fa-oil-well',
+        fields: [
+          {
+            key: 'fuel_dues_amount',
+            label: 'Pending Fuel Dues (₹)',
+            type: 'currency',
+            grid: 'col-3',
+            placeholder: '0.00'
+          },
+          {
+            key: 'fuel_due_from',
+            label: 'Fuel Due From Period',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. Nov 2023'
+          },
+          {
+            key: 'fuel_submitted_on',
+            label: 'Fuel Bill Submitted On',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. 10/03/2024'
+          },
+          {
+            key: 'fuel_remarks',
+            label: 'Fuel Station / Oil PSU Remarks',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'Indian Oil / BPCL pump remarks'
+          }
+        ]
+      },
+      {
+        id: 'sec_other_dues',
+        name: 'Other Operational Expenses & Contingencies',
+        icon: 'fa-file-invoice',
+        fields: [
+          {
+            key: 'other_expenses_amount',
+            label: 'Other Contingency Expenses (₹)',
+            type: 'currency',
+            grid: 'col-4',
+            placeholder: '0.00'
+          },
+          {
+            key: 'other_expenses_details',
+            label: 'Details of Other Expenses & Liabilities',
+            type: 'textarea',
+            grid: 'col-8',
+            placeholder: 'Details regarding water, electricity, stationeries, security or pending claims...'
+          }
+        ]
+      }
+    ]
+  }
+];
+
+
 // Export to window
 if (typeof window !== 'undefined') {
   window.RTO_SCHEMA = {
     HEADERS: SHEET_HEADERS,
     INDICES: COLUMN_INDICES,
     MANPOWER_ROLES,
-    TABLE_COLUMN_GROUPS
+    TABLE_COLUMN_GROUPS,
+    EDIT_MODULES: RTO_OFFICE_EDIT_SCHEMA
   };
 }
 if (typeof module !== 'undefined' && module.exports) {
@@ -261,7 +896,8 @@ if (typeof module !== 'undefined' && module.exports) {
     HEADERS: SHEET_HEADERS,
     INDICES: COLUMN_INDICES,
     MANPOWER_ROLES,
-    TABLE_COLUMN_GROUPS
+    TABLE_COLUMN_GROUPS,
+    EDIT_MODULES: RTO_OFFICE_EDIT_SCHEMA
   };
 }
 
@@ -1247,6 +1883,8 @@ class SupabaseService {
         const itMatch = this.matchOfficeToIt(row, itItems);
 
         const record = {
+          ...row,
+          rawRow: { ...row },
           id: row.id || `office-${idx + 1}`,
           index: idx + 1,
           timestamp: row.timestamp || '',
@@ -3423,6 +4061,10 @@ class RTOApp {
    * Router / View Switcher
    */
   navigateTo(viewId, pushHistory = true) {
+    if (viewId === 'config' || viewId === 'database') {
+      this.navigateTo('dashboard');
+      return;
+    }
     if (viewId === 'admin' && !this.adminSession) {
       this.openAdminLoginModal();
       return;
@@ -6094,6 +6736,39 @@ class RTOApp {
   // =========================================================================
   // OFFICE SURVEY DATA EDITING & LIVE SUPABASE WRITE
   // =========================================================================
+  
+  getEditModules() {
+    if (typeof window !== 'undefined' && window.RTO_SCHEMA && window.RTO_SCHEMA.EDIT_MODULES) {
+      return window.RTO_SCHEMA.EDIT_MODULES;
+    }
+    if (typeof RTO_OFFICE_EDIT_SCHEMA !== 'undefined') {
+      return RTO_OFFICE_EDIT_SCHEMA;
+    }
+    return [];
+  }
+
+  getOfficeDbValue(office, key) {
+    if (!office) return '';
+    if (office.rawRow && office.rawRow[key] !== undefined && office.rawRow[key] !== null) {
+      return office.rawRow[key];
+    }
+    if (office[key] !== undefined && office[key] !== null) {
+      return office[key];
+    }
+    if (office.rawPayload && office.rawPayload[key] !== undefined && office.rawPayload[key] !== null) {
+      return office.rawPayload[key];
+    }
+    if (office.customFields && office.customFields[key] !== undefined && office.customFields[key] !== null) {
+      return office.customFields[key];
+    }
+    // Camel case fallback
+    const camel = key.replace(/_([a-z0-9])/g, (_, letter) => letter.toUpperCase());
+    if (office[camel] !== undefined && office[camel] !== null) {
+      return office[camel];
+    }
+    return '';
+  }
+
   async openEditOfficeModal(officeId = null) {
     if (!this.adminSession) {
       this.openAdminLoginModal();
@@ -6105,24 +6780,42 @@ class RTOApp {
       this.editingOfficeId = this.allOffices[0].id;
     }
 
-    const office = this.allOffices.find(o => o.id === this.editingOfficeId);
+    let office = this.allOffices.find(o => o.id === this.editingOfficeId);
     if (!office) {
       alert('Office record not found.');
       return;
     }
 
-    // Ensure modules, menus, fields are loaded
-    if (this.modules.length === 0 || this.menus.length === 0 || this.fields.length === 0) {
-      try {
-        this.modules = await this.supabaseService.getModules();
-        this.menus = await this.supabaseService.getMenus();
-        this.fields = await this.supabaseService.getFields();
-      } catch (e) {
-        console.warn('Could not fetch latest CMS schema:', e);
+    // Attempt to fetch fresh row directly from Supabase
+    try {
+      if (this.supabaseService && this.supabaseService.client) {
+        const { data, error } = await this.supabaseService.client
+          .from(this.supabaseService.config.tableName)
+          .select('*')
+          .eq('id', this.editingOfficeId)
+          .maybeSingle();
+
+        if (!error && data) {
+          office = { ...office, ...data, rawRow: { ...data } };
+          const idx = this.allOffices.findIndex(o => o.id === this.editingOfficeId);
+          if (idx !== -1) this.allOffices[idx] = office;
+        }
       }
+    } catch (e) {
+      console.warn('Could not fetch live office row from Supabase:', e);
     }
 
-    // Modal title & ID
+    // Populate top office switcher dropdown
+    const topSelector = document.getElementById('edit-office-dropdown-select');
+    if (topSelector) {
+      const sorted = [...this.allOffices].sort((a, b) => (a.officeName || '').localeCompare(b.officeName || ''));
+      topSelector.innerHTML = sorted.map(o => `
+        <option value="${o.id}" ${o.id === office.id ? 'selected' : ''}>${o.officeName} (${o.district})</option>
+      `).join('');
+      topSelector.value = office.id;
+    }
+
+    // Modal title & subtitle & ID
     const titleEl = document.getElementById('modal-edit-office-title');
     const subtitleEl = document.getElementById('modal-edit-office-subtitle');
     const hiddenIdEl = document.getElementById('edit-office-id');
@@ -6131,29 +6824,77 @@ class RTOApp {
     if (subtitleEl) subtitleEl.textContent = `District: ${office.district} • Official MVD Administrative Record`;
     if (hiddenIdEl) hiddenIdEl.value = office.id;
 
-    if (!this.editOfficeActiveModuleId || !this.modules.some(m => m.id === this.editOfficeActiveModuleId)) {
-      this.editOfficeActiveModuleId = this.modules.length > 0 ? this.modules[0].id : 'mod_infra';
+    const editModules = this.getEditModules();
+    if (!this.editOfficeActiveModuleId || !editModules.some(m => m.id === this.editOfficeActiveModuleId)) {
+      this.editOfficeActiveModuleId = editModules.length > 0 ? editModules[0].id : 'mod_basic';
     }
 
     // Render Module tabs
     this.renderEditOfficeTabs();
 
-    // Render Form Body for active module tab
+    // Render Form Body for all module tabs
     this.renderEditOfficeFormBody();
 
     const modal = document.getElementById('modal-edit-office');
     if (modal) modal.classList.remove('hidden');
   }
 
+  async handleEditOfficeSelectChange(officeIdOrVal) {
+    if (!officeIdOrVal) return;
+
+    // Find office by ID or Office Name
+    let target = this.allOffices.find(o => o.id === officeIdOrVal || o.officeName === officeIdOrVal);
+    if (!target) {
+      console.warn('Target office not found in local cache:', officeIdOrVal);
+      return;
+    }
+
+    this.editingOfficeId = target.id;
+
+    // Fetch full live record from Supabase
+    try {
+      if (this.supabaseService && this.supabaseService.client) {
+        const { data, error } = await this.supabaseService.client
+          .from(this.supabaseService.config.tableName)
+          .select('*')
+          .eq('id', target.id)
+          .maybeSingle();
+
+        if (!error && data) {
+          target = { ...target, ...data, rawRow: { ...data } };
+          const idx = this.allOffices.findIndex(o => o.id === target.id);
+          if (idx !== -1) this.allOffices[idx] = target;
+        }
+      }
+    } catch (err) {
+      console.warn('Could not fetch live office record from Supabase:', err);
+    }
+
+    // Update modal header & hidden input
+    const titleEl = document.getElementById('modal-edit-office-title');
+    const subtitleEl = document.getElementById('modal-edit-office-subtitle');
+    const hiddenIdEl = document.getElementById('edit-office-id');
+    const topSelector = document.getElementById('edit-office-dropdown-select');
+
+    if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-pen-to-square text-warning"></i> Edit: ${target.officeName}`;
+    if (subtitleEl) subtitleEl.textContent = `District: ${target.district} • Official MVD Administrative Record`;
+    if (hiddenIdEl) hiddenIdEl.value = target.id;
+    if (topSelector && topSelector.value !== target.id) topSelector.value = target.id;
+
+    // Re-render form body with new office values
+    this.renderEditOfficeFormBody();
+  }
+
   renderEditOfficeTabs() {
     const tabsBar = document.getElementById('edit-office-module-tabs');
     if (!tabsBar) return;
 
-    if (!this.editOfficeActiveModuleId || !this.modules.some(m => m.id === this.editOfficeActiveModuleId)) {
-      this.editOfficeActiveModuleId = this.modules.length > 0 ? this.modules[0].id : 'mod_infra';
+    const editModules = this.getEditModules();
+    if (!this.editOfficeActiveModuleId || !editModules.some(m => m.id === this.editOfficeActiveModuleId)) {
+      this.editOfficeActiveModuleId = editModules.length > 0 ? editModules[0].id : 'mod_basic';
     }
 
-    tabsBar.innerHTML = this.modules.map(mod => `
+    tabsBar.innerHTML = this.getEditModules().map(mod => `
       <button type="button" 
               class="modal-tab-btn ${mod.id === this.editOfficeActiveModuleId ? 'active' : ''}" 
               onclick="window.RTO_APP.switchEditOfficeModuleTab('${mod.id}')">
@@ -6182,144 +6923,119 @@ class RTOApp {
     const office = this.allOffices.find(o => o.id === this.editingOfficeId);
     if (!office) return;
 
-    bodyEl.innerHTML = this.modules.map(mod => {
-      const isVisible = mod.id === this.editOfficeActiveModuleId;
-      const modMenus = this.menus.filter(m => m.module_id === mod.id);
+    const keralaDistricts = [
+      'Thiruvananthapuram', 'Kollam', 'Pathanamthitta', 'Alappuzha',
+      'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur',
+      'Palakkad', 'Malappuram', 'Kozhikode', 'Wayanad',
+      'Kannur', 'Kasaragod'
+    ];
 
-      let contentHtml = '';
-      if (modMenus.length === 0) {
-        contentHtml = `
-          <div class="empty-workbench-notice">
-            <i class="fa-solid fa-list-check"></i>
-            <p>No sub-sections configured under ${mod.name}.</p>
+    const sortedOffices = [...this.allOffices].sort((a, b) => (a.officeName || '').localeCompare(b.officeName || ''));
+
+    bodyEl.innerHTML = this.getEditModules().map(mod => {
+      const isVisible = mod.id === this.editOfficeActiveModuleId;
+
+      const contentHtml = mod.sections.map(sec => {
+        return `
+          <div class="edit-menu-section">
+            <div class="edit-menu-section-header">
+              <i class="fa-solid ${sec.icon || 'fa-list-check'}"></i>
+              <span>${sec.name}</span>
+              <span class="badge badge-subtle ml-auto text-xs">${sec.fields.length} fields</span>
+            </div>
+
+            <div class="form-dynamic-grid">
+              ${sec.fields.map(fld => {
+                const gridCol = fld.grid || 'col-6';
+                const reqStar = fld.required ? '<span class="field-required-star text-danger">*</span>' : '';
+                const rawVal = this.getOfficeDbValue(office, fld.key);
+                const safeVal = (rawVal === null || rawVal === undefined) ? '' : rawVal;
+
+                let inputHtml = '';
+                switch (fld.type) {
+                  case 'office_select':
+                    inputHtml = `
+                      <select class="form-control" data-key="${fld.key}" data-type="office_select" onchange="window.RTO_APP.handleEditOfficeSelectChange(this.value)">
+                        ${sortedOffices.map(o => {
+                          const isSel = o.id === office.id || String(safeVal).trim().toLowerCase() === String(o.officeName).trim().toLowerCase();
+                          return `<option value="${o.id}" data-name="${o.officeName.replace(/"/g, '&quot;')}" ${isSel ? 'selected' : ''}>${o.officeName} (${o.district})</option>`;
+                        }).join('')}
+                      </select>
+                    `;
+                    break;
+
+                  case 'district_select':
+                    inputHtml = `
+                      <select class="form-control" data-key="${fld.key}" data-type="district_select" ${fld.required ? 'required' : ''}>
+                        <option value="">-- Choose District --</option>
+                        ${keralaDistricts.map(d => `
+                          <option value="${d}" ${String(safeVal).trim().toLowerCase() === d.toLowerCase() ? 'selected' : ''}>${d}</option>
+                        `).join('')}
+                      </select>
+                    `;
+                    break;
+
+                  case 'select':
+                    const opts = Array.isArray(fld.options) ? fld.options : [];
+                    inputHtml = `
+                      <select class="form-control" data-key="${fld.key}" data-type="select" ${fld.required ? 'required' : ''}>
+                        <option value="">-- Choose Option --</option>
+                        ${opts.map(o => `
+                          <option value="${o}" ${String(safeVal).trim().toLowerCase() === String(o).trim().toLowerCase() ? 'selected' : ''}>${o}</option>
+                        `).join('')}
+                      </select>
+                    `;
+                    break;
+
+                  case 'boolean':
+                    const isChecked = safeVal === true || safeVal === 'true' || safeVal === 1 || String(safeVal).toLowerCase() === 'yes';
+                    inputHtml = `
+                      <div class="mt-2">
+                        <label class="checkbox-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                          <input type="checkbox" data-key="${fld.key}" data-type="boolean" ${isChecked ? 'checked' : ''} style="width:18px;height:18px;">
+                          <span class="text-sm font-semibold">${fld.help || 'Enabled / Active / In Position'}</span>
+                        </label>
+                      </div>
+                    `;
+                    break;
+
+                  case 'number':
+                    inputHtml = `<input type="number" class="form-control" data-key="${fld.key}" data-type="number" value="${safeVal}" placeholder="${fld.placeholder || '0'}" ${fld.required ? 'required' : ''}>`;
+                    break;
+
+                  case 'currency':
+                    inputHtml = `
+                      <div class="input-with-icon-preview" style="position:relative;">
+                        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-weight:700;color:#64748b;">₹</span>
+                        <input type="number" step="any" class="form-control" style="padding-left:30px;" data-key="${fld.key}" data-type="currency" value="${safeVal}" placeholder="${fld.placeholder || '0.00'}" ${fld.required ? 'required' : ''}>
+                      </div>
+                    `;
+                    break;
+
+                  case 'textarea':
+                    inputHtml = `<textarea class="form-control" rows="3" data-key="${fld.key}" data-type="textarea" placeholder="${fld.placeholder || ''}" ${fld.required ? 'required' : ''}>${safeVal}</textarea>`;
+                    break;
+
+                  case 'text':
+                  default:
+                    inputHtml = `<input type="text" class="form-control" data-key="${fld.key}" data-type="text" value="${safeVal}" placeholder="${fld.placeholder || ''}" ${fld.required ? 'required' : ''}>`;
+                    break;
+                }
+
+                return `
+                  <div class="form-group ${gridCol}">
+                    <label class="font-bold text-sm mb-1 display-block" style="display:flex;align-items:center;gap:4px;">
+                      ${fld.label} ${reqStar}
+                    </label>
+                    ${inputHtml}
+                    ${fld.help && fld.type !== 'boolean' ? `<span class="text-xs text-muted mt-1 display-block" style="display:block;">${fld.help}</span>` : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
           </div>
         `;
-      } else {
-        contentHtml = modMenus.map(menu => {
-          const menuFields = this.fields.filter(f => f.menu_id === menu.id);
-
-          return `
-            <div class="edit-menu-section">
-              <div class="edit-menu-section-header">
-                <i class="fa-solid ${menu.icon || 'fa-list-check'}"></i>
-                <span>${menu.name}</span>
-                <span class="badge badge-subtle ml-auto text-xs">${menuFields.length} fields</span>
-              </div>
-
-              <div class="form-dynamic-grid">
-                ${menuFields.length === 0 ? '<p class="text-xs text-muted">No fields configured in this section.</p>' : ''}
-                ${menuFields.map(fld => {
-                  const gridCol = fld.grid_width || 'col-6';
-                  const reqStar = fld.is_required ? '<span class="field-required-star">*</span>' : '';
-                  
-                  // Get current value from office object or rawPayload or customFields
-                  let currentVal = '';
-                  const key = fld.field_key;
-                  if (office[key] !== undefined && office[key] !== null) {
-                    currentVal = office[key];
-                  } else if (office.rawPayload && office.rawPayload[key] !== undefined) {
-                    currentVal = office.rawPayload[key];
-                  } else if (office.customFields && office.customFields[key] !== undefined) {
-                    currentVal = office.customFields[key];
-                  } else {
-                    currentVal = fld.default_value || '';
-                  }
-
-                  let inputHtml = '';
-                  switch (fld.data_type) {
-                    case 'number':
-                      inputHtml = `<input type="number" class="form-control" data-key="${key}" data-type="number" value="${currentVal}" placeholder="${fld.placeholder || '0'}" ${fld.is_required ? 'required' : ''}>`;
-                      break;
-                    case 'currency':
-                      inputHtml = `
-                        <div class="input-with-icon-preview">
-                          <span class="icon-preview-box text-bold" style="left: 12px; right: auto;">₹</span>
-                          <input type="number" class="form-control" style="padding-left: 32px;" data-key="${key}" data-type="currency" value="${currentVal}" placeholder="${fld.placeholder || '0.00'}" ${fld.is_required ? 'required' : ''}>
-                        </div>
-                      `;
-                      break;
-                    case 'select':
-                      const opts = Array.isArray(fld.options) ? fld.options : [];
-                      inputHtml = `
-                        <select class="form-control" data-key="${key}" data-type="select" ${fld.is_required ? 'required' : ''}>
-                          <option value="">-- Choose Option --</option>
-                          ${opts.map(o => `<option value="${o}" ${String(currentVal).toLowerCase() === String(o).toLowerCase() ? 'selected' : ''}>${o}</option>`).join('')}
-                        </select>
-                      `;
-                      break;
-                    case 'boolean':
-                      const isChecked = currentVal === true || currentVal === 'true' || currentVal === 1 || currentVal === 'yes';
-                      inputHtml = `
-                        <div class="mt-2">
-                          <label class="checkbox-label">
-                            <input type="checkbox" data-key="${key}" data-type="boolean" ${isChecked ? 'checked' : ''}>
-                            <span>Yes / Confirmed</span>
-                          </label>
-                        </div>
-                      `;
-                      break;
-                    case 'date':
-                      inputHtml = `<input type="date" class="form-control" data-key="${key}" data-type="date" value="${currentVal}" ${fld.is_required ? 'required' : ''}>`;
-                      break;
-                    case 'phone':
-                      inputHtml = `
-                        <div class="input-with-icon-preview">
-                          <input type="tel" class="form-control" data-key="${key}" data-type="phone" value="${currentVal}" placeholder="${fld.placeholder || '94470XXXXX'}" ${fld.is_required ? 'required' : ''}>
-                          <span class="icon-preview-box"><i class="fa-solid fa-phone"></i></span>
-                        </div>
-                      `;
-                      break;
-                    case 'gps_coordinates':
-                      inputHtml = `
-                        <div class="input-with-icon-preview">
-                          <input type="text" class="form-control" data-key="${key}" data-type="gps_coordinates" value="${currentVal}" placeholder="${fld.placeholder || 'Latitude, Longitude'}" ${fld.is_required ? 'required' : ''}>
-                          <span class="icon-preview-box text-danger"><i class="fa-solid fa-location-dot"></i></span>
-                        </div>
-                      `;
-                      break;
-                    case 'textarea':
-                      inputHtml = `<textarea class="form-control" rows="2" data-key="${key}" data-type="textarea" placeholder="${fld.placeholder || 'Remarks...'}" ${fld.is_required ? 'required' : ''}>${currentVal}</textarea>`;
-                      break;
-                    case 'text':
-                    default:
-                      if (key === 'office_name') {
-                        const officeNames = Array.from(new Set(
-                          this.allOffices.map(o => o.officeName || o.office_name).filter(Boolean)
-                        )).sort((a, b) => a.localeCompare(b));
-
-                        if (currentVal && !officeNames.includes(currentVal)) {
-                          officeNames.unshift(currentVal);
-                        }
-
-                        inputHtml = `
-                          <select class="form-control" data-key="${key}" data-type="text" ${fld.is_required ? 'required' : ''}>
-                            <option value="">-- Select MVD Office Name --</option>
-                            ${officeNames.map(name => `
-                              <option value="${name.replace(/"/g, '&quot;')}" ${String(currentVal).trim().toLowerCase() === String(name).trim().toLowerCase() ? 'selected' : ''}>
-                                ${name}
-                              </option>
-                            `).join('')}
-                          </select>
-                        `;
-                      } else {
-                        inputHtml = `<input type="text" class="form-control" data-key="${key}" data-type="text" value="${currentVal}" placeholder="${fld.placeholder || ''}" ${fld.is_required ? 'required' : ''}>`;
-                      }
-                      break;
-                  }
-
-                  return `
-                    <div class="form-group ${gridCol}">
-                      <label class="font-bold text-sm">${fld.label} ${reqStar}</label>
-                      ${inputHtml}
-                      ${fld.help_text ? `<span class="text-xs text-muted mt-1 display-block">${fld.help_text}</span>` : ''}
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
+      }).join('');
 
       return `
         <div id="edit-mod-panel-${mod.id}" class="edit-office-module-panel ${isVisible ? '' : 'hidden'}">
@@ -6344,23 +7060,6 @@ class RTOApp {
     try {
       const inputs = document.querySelectorAll('#edit-office-form [data-key]');
       const updates = {};
-      const customUpdates = {};
-
-      const knownCols = new Set([
-        'district','office_name','year_of_functioning','building_type','total_office_area',
-        'office_gps_raw','office_latitude','office_longitude','has_own_ground','dl_days',
-        'cf_days','dl_grounds_count','cf_grounds_count','dl_gps_1_raw','dl_gps_1_lat','dl_gps_1_lng',
-        'dl_gps_2_raw','dl_gps_3_raw','cf_gps_1_raw','cf_gps_1_lat','cf_gps_1_lng','cf_gps_2_raw','cf_gps_3_raw',
-        'cf_other_location_details','rto_name','rto_mobile','jrto_name','jrto_mobile','landline_pro',
-        'rto_available','jrto_available','dtc_name','dtc_mobile','mvi_sanctioned','mvi_available',
-        'amvi_sanctioned','amvi_available','ss_sanctioned','ss_available','js_sanctioned','js_available',
-        'clerk_sanctioned','clerk_available','ha_pro_sanctioned','ha_pro_available','driver_sanctioned',
-        'driver_available','oa_sanctioned','oa_available','pts_available','other_staff_details',
-        'vehicles_diesel','vehicles_petrol','vehicles_electric','vehicles_over_10_years','rent_dues_amount',
-        'rent_due_from','rent_submitted_on','rent_remarks','repair_dues_amount','repair_due_from',
-        'repair_submitted_on','repair_remarks','fuel_dues_amount','fuel_due_from','fuel_submitted_on',
-        'fuel_remarks','other_expenses_details','other_expenses_amount'
-      ]);
 
       inputs.forEach(input => {
         const key = input.dataset.key;
@@ -6371,22 +7070,22 @@ class RTOApp {
           val = input.checked;
         } else if (type === 'number' || type === 'currency') {
           val = input.value === '' ? null : (parseFloat(input.value) || 0);
+        } else if (type === 'office_select') {
+          const selOpt = input.options ? input.options[input.selectedIndex] : null;
+          val = selOpt ? (selOpt.getAttribute('data-name') || selOpt.text.split(' (')[0].trim()) : input.value.trim();
         } else {
-          val = input.value.trim();
+          val = input.value.trim() === '' ? null : input.value.trim();
         }
 
-        if (knownCols.has(key)) {
-          updates[key] = val;
-        } else {
-          customUpdates[key] = val;
-        }
+        updates[key] = val;
       });
 
-      if (Object.keys(customUpdates).length > 0) {
-        updates.custom_fields = customUpdates;
-      }
-
+      // Write directly to Supabase table
       await this.supabaseService.updateOffice(officeId, updates);
+
+      // Refresh local cache and trigger UI re-renders
+      this.allOffices = this.supabaseService.data.offices;
+      this.applyFilters();
 
       this.closeModal('modal-edit-office');
 
@@ -6399,9 +7098,11 @@ class RTOApp {
       }
       if (this.currentView === 'admin' && this.adminStudioActiveTab === 'offices') {
         this.renderAdminOfficesTable();
+      } else {
+        this.renderCurrentView();
       }
 
-      alert(`✓ Successfully updated "${updatedOffice ? updatedOffice.officeName : officeId}" in the database!`);
+      alert(`✓ Successfully updated "${updatedOffice ? updatedOffice.officeName : officeId}" in Supabase!`);
 
     } catch (err) {
       console.error('Failed to update office:', err);
@@ -6414,7 +7115,7 @@ class RTOApp {
     }
   }
 
-  setElText(id, text) {
+    setElText(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text !== null && text !== undefined ? text : '—';
   }
@@ -6425,5 +7126,4 @@ document.addEventListener('DOMContentLoaded', () => {
   window.RTO_APP = new RTOApp();
   window.RTO_APP.init();
 });
-
 

@@ -66,9 +66,6 @@
         <button class="btn btn-outline btn-sm" id="btn-refresh-data" title="Retrieve latest data from Database">
           <i class="fa-solid fa-rotate"></i> <span>Refresh Data</span>
         </button>
-        <button class="btn btn-primary btn-sm" id="btn-open-config" title="Configure Database Connection">
-          <i class="fa-solid fa-database"></i> <span>Database</span>
-        </button>
 
         <!-- Admin Mode Buttons -->
         <button class="btn btn-warning btn-sm" id="btn-admin-login" onclick="window.RTO_APP.openAdminLoginModal()" title="Administrative Mode Login">
@@ -272,8 +269,8 @@
         
         <!-- State KPI Cards -->
         <div class="kpi-grid">
-          <div class="kpi-card" onclick="window.RTO_APP.navigateTo('districts')">
-            <div class="kpi-icon bg-blue-subtle text-primary"><i class="fa-solid fa-map-location-dot"></i></div>
+          <div class="kpi-card kpi-card-indigo" onclick="window.RTO_APP.navigateTo('districts')">
+            <div class="kpi-icon bg-indigo-subtle text-indigo"><i class="fa-solid fa-map-location-dot"></i></div>
             <div class="kpi-content">
               <span class="kpi-label">TOTAL DISTRICTS</span>
               <div class="kpi-value" id="kpi-total-districts">0</div>
@@ -282,17 +279,17 @@
             <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           </div>
 
-          <div class="kpi-card" onclick="window.RTO_APP.navigateTo('directory')">
-            <div class="kpi-icon bg-indigo-subtle text-indigo"><i class="fa-solid fa-building"></i></div>
+          <div class="kpi-card kpi-card-blue" onclick="window.RTO_APP.navigateTo('admin')">
+            <div class="kpi-icon bg-blue-subtle text-primary"><i class="fa-solid fa-building"></i></div>
             <div class="kpi-content">
               <span class="kpi-label">TOTAL RTO OFFICES</span>
               <div class="kpi-value" id="kpi-total-offices">0</div>
-              <span class="kpi-sub">RTO & Sub-RTO Units</span>
+              <span class="kpi-sub">RTO &amp; Sub-RTO Units</span>
             </div>
             <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           </div>
 
-          <div class="kpi-card" onclick="window.RTO_APP.navigateTo('directory')">
+          <div class="kpi-card kpi-card-slate" onclick="window.RTO_APP.navigateTo('admin')">
             <div class="kpi-icon bg-slate-subtle text-slate"><i class="fa-solid fa-ruler-combined"></i></div>
             <div class="kpi-content">
               <span class="kpi-label">TOTAL OFFICE AREA</span>
@@ -302,7 +299,7 @@
             <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           </div>
 
-          <div class="kpi-card" onclick="window.RTO_APP.navigateTo('manpower')">
+          <div class="kpi-card kpi-card-emerald" onclick="window.RTO_APP.navigateTo('manpower')">
             <div class="kpi-icon bg-emerald-subtle text-success"><i class="fa-solid fa-users"></i></div>
             <div class="kpi-content">
               <span class="kpi-label">STAFF AVAILABLE / SANCTIONED</span>
@@ -312,18 +309,18 @@
             <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           </div>
 
-          <div class="kpi-card" onclick="window.RTO_APP.navigateTo('testgrounds')">
+          <div class="kpi-card kpi-card-violet" onclick="window.RTO_APP.navigateTo('testgrounds')">
             <div class="kpi-icon bg-purple-subtle text-purple"><i class="fa-solid fa-road-circle-check"></i></div>
             <div class="kpi-content">
               <span class="kpi-label">TEST GROUNDS</span>
               <div class="kpi-value"><span id="kpi-dl-grounds">0</span> DL | <span id="kpi-cf-grounds">0</span> CF</div>
-              <span class="kpi-sub">Driving License & Fitness Tracks</span>
+              <span class="kpi-sub">Driving License &amp; Fitness Tracks</span>
             </div>
             <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           </div>
 
-          <div class="kpi-card" onclick="window.RTO_APP.navigateTo('vehicles')">
-            <div class="kpi-icon bg-amber-subtle text-amber"><i class="fa-solid fa-car-rear"></i></div>
+          <div class="kpi-card kpi-card-sky" onclick="window.RTO_APP.navigateTo('vehicles')">
+            <div class="kpi-icon bg-sky-subtle text-sky"><i class="fa-solid fa-car-rear"></i></div>
             <div class="kpi-content">
               <span class="kpi-label">DEPARTMENT FLEET</span>
               <div class="kpi-value" id="kpi-total-vehicles">0</div>
@@ -332,17 +329,17 @@
             <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           </div>
 
-          <div class="kpi-card" onclick="window.RTO_APP.navigateTo('finances')">
-            <div class="kpi-icon bg-rose-subtle text-danger"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+          <div class="kpi-card kpi-card-amber" onclick="window.RTO_APP.navigateTo('finances')">
+            <div class="kpi-icon bg-amber-subtle text-amber"><i class="fa-solid fa-file-invoice-dollar"></i></div>
             <div class="kpi-content">
               <span class="kpi-label">TOTAL FINANCIAL DUES</span>
               <div class="kpi-value text-danger" id="kpi-total-dues">₹0</div>
-              <span class="kpi-sub">Rent, Repairs & Fuel Arrears</span>
+              <span class="kpi-sub">Rent, Repairs &amp; Fuel Arrears</span>
             </div>
             <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           </div>
 
-          <div class="kpi-card admin-only-health hidden" onclick="window.RTO_APP.navigateTo('districts')">
+          <div class="kpi-card kpi-card-teal admin-only-health hidden" onclick="window.RTO_APP.navigateTo('districts')">
             <div class="kpi-icon bg-cyan-subtle text-cyan"><i class="fa-solid fa-heart-pulse"></i></div>
             <div class="kpi-content">
               <span class="kpi-label">AVG OFFICE HEALTH SCORE</span>
@@ -352,10 +349,10 @@
             <div class="kpi-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           </div>
 
-          <div class="kpi-card" onclick="window.RTO_APP.navigateTo('itinventory')">
+          <div class="kpi-card kpi-card-cyan" onclick="window.RTO_APP.navigateTo('itinventory')">
             <div class="kpi-icon bg-blue-subtle text-primary"><i class="fa-solid fa-server"></i></div>
             <div class="kpi-content">
-              <span class="kpi-label">IT & WORKSTATIONS</span>
+              <span class="kpi-label">IT &amp; WORKSTATIONS</span>
               <div class="kpi-value"><span id="kpi-it-working-pcs">0</span> Working</div>
               <span class="kpi-sub" id="kpi-it-sub"><span id="kpi-it-total-pcs">0</span> Total PCs | <span id="kpi-it-faulty-pcs" class="text-danger">0</span> Faulty</span>
             </div>
@@ -1867,6 +1864,16 @@
         <button class="modal-close-btn" onclick="window.RTO_APP.closeModal('modal-edit-office')">×</button>
       </div>
       
+      <!-- Quick Office Switcher Bar inside Modal -->
+      <div class="edit-office-selector-bar" id="edit-office-selector-bar">
+        <label for="edit-office-dropdown-select" class="edit-office-selector-label">
+          <i class="fa-solid fa-building-flag text-primary"></i> <strong>Select Office to Edit:</strong>
+        </label>
+        <select id="edit-office-dropdown-select" class="form-control" onchange="window.RTO_APP.handleEditOfficeSelectChange(this.value)">
+          <!-- Populated dynamically with all MVD offices -->
+        </select>
+      </div>
+
       <!-- Module Navigation Tabs inside Modal -->
       <div class="modal-tabs-bar" id="edit-office-module-tabs">
         <!-- Dynamically rendered tabs for each module -->
@@ -2153,11 +2160,8 @@
         <button class="btn btn-primary" onclick="window.RTO_APP.refreshData()">
           <i class="fa-solid fa-rotate"></i> Retry Connection
         </button>
-        <button class="btn btn-outline" onclick="window.RTO_APP.openConfigModal()">
-          <i class="fa-solid fa-sliders"></i> Connection Settings
-        </button>
         <button class="btn btn-subtle" onclick="window.RTO_APP.useBuiltinSample()">
-          Use Built-in Sample Dataset
+          Use Offline Cached Dataset
         </button>
       </div>
   <!-- Sidebar Backdrop for Mobile Off-Canvas Drawer -->

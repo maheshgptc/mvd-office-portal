@@ -239,13 +239,648 @@ const TABLE_COLUMN_GROUPS = [
   }
 ];
 
+
+// ============================================================================
+// FULL SCHEMA FOR ADMIN EDIT MODAL (All 69 Non-Excluded Supabase Columns)
+// ============================================================================
+const RTO_OFFICE_EDIT_SCHEMA = [
+  {
+    id: 'mod_basic',
+    name: 'Basic Office Details & Officers',
+    icon: 'fa-building',
+    sections: [
+      {
+        id: 'sec_basic_info',
+        name: 'Primary Office Information',
+        icon: 'fa-id-card',
+        fields: [
+          {
+            key: 'office_name',
+            label: 'Office Name',
+            type: 'office_select',
+            grid: 'col-6',
+            required: true,
+            help: 'Switch office to edit, or select office name'
+          },
+          {
+            key: 'district',
+            label: 'District',
+            type: 'district_select',
+            grid: 'col-6',
+            required: true,
+            help: 'Administrative District in Kerala'
+          },
+          {
+            key: 'year_of_functioning',
+            label: 'Year of Functioning (Est.)',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'e.g. 1985'
+          },
+          {
+            key: 'building_type',
+            label: 'Building Type',
+            type: 'select',
+            grid: 'col-4',
+            options: ['Government Building', 'Rented Building', 'Other']
+          },
+          {
+            key: 'total_office_area',
+            label: 'Total Office Area (Sq Ft)',
+            type: 'number',
+            grid: 'col-4',
+            placeholder: 'e.g. 4500'
+          }
+        ]
+      },
+      {
+        id: 'sec_office_geo',
+        name: 'Office Geo-Location & GPS Coordinates',
+        icon: 'fa-map-location-dot',
+        fields: [
+          {
+            key: 'office_gps_raw',
+            label: 'Office GPS Coordinates (Raw / Maps Link)',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'e.g. 8.5061, 76.9558 or Google Maps URL'
+          },
+          {
+            key: 'office_latitude',
+            label: 'Office Latitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: 'e.g. 8.5061'
+          },
+          {
+            key: 'office_longitude',
+            label: 'Office Longitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: 'e.g. 76.9558'
+          }
+        ]
+      },
+      {
+        id: 'sec_officers',
+        name: 'Key Officers & Contact Information',
+        icon: 'fa-user-tie',
+        fields: [
+          {
+            key: 'dtc_name',
+            label: 'Deputy Transport Commissioner (DTC)',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Officer Name'
+          },
+          {
+            key: 'dtc_mobile',
+            label: 'DTC Mobile Number',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Mobile / WhatsApp'
+          },
+          {
+            key: 'rto_name',
+            label: 'RTO / Office In-Charge Name',
+            type: 'text',
+            grid: 'col-5',
+            placeholder: 'Officer Name'
+          },
+          {
+            key: 'rto_mobile',
+            label: 'RTO Mobile Number',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'Mobile Number'
+          },
+          {
+            key: 'rto_available',
+            label: 'RTO In-Position / Present',
+            type: 'boolean',
+            grid: 'col-3',
+            help: 'Currently deployed & present'
+          },
+          {
+            key: 'jrto_name',
+            label: 'Joint RTO Name',
+            type: 'text',
+            grid: 'col-5',
+            placeholder: 'Officer Name'
+          },
+          {
+            key: 'jrto_mobile',
+            label: 'Joint RTO Mobile Number',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'Mobile Number'
+          },
+          {
+            key: 'jrto_available',
+            label: 'Joint RTO In-Position / Present',
+            type: 'boolean',
+            grid: 'col-3',
+            help: 'Currently deployed & present'
+          },
+          {
+            key: 'landline_pro',
+            label: 'Office Landline / Public Relations (PRO)',
+            type: 'text',
+            grid: 'col-12',
+            placeholder: 'e.g. 0471-2333333'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mod_manpower',
+    name: 'Manpower & Staff Cadres',
+    icon: 'fa-users-gear',
+    sections: [
+      {
+        id: 'sec_executive_cadre',
+        name: 'Executive Cadre (MVI & AMVI)',
+        icon: 'fa-shield-halved',
+        fields: [
+          {
+            key: 'mvi_sanctioned',
+            label: 'Motor Vehicle Inspector (MVI) Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'mvi_available',
+            label: 'MVI Available (In Position)',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'amvi_sanctioned',
+            label: 'Assistant MVI (AMVI) Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'amvi_available',
+            label: 'AMVI Available (In Position)',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          }
+        ]
+      },
+      {
+        id: 'sec_supervisory_cadre',
+        name: 'Supervisory & Ministerial Staff',
+        icon: 'fa-user-group',
+        fields: [
+          {
+            key: 'ss_sanctioned',
+            label: 'Senior Superintendent Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'ss_available',
+            label: 'Senior Superintendent Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'js_sanctioned',
+            label: 'Junior Superintendent Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'js_available',
+            label: 'Junior Superintendent Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'ha_pro_sanctioned',
+            label: 'Head Clerk / HA / PRO Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'ha_pro_available',
+            label: 'Head Clerk / HA / PRO Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'clerk_sanctioned',
+            label: 'Senior / Junior Clerks Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'clerk_available',
+            label: 'Senior / Junior Clerks Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          }
+        ]
+      },
+      {
+        id: 'sec_support_cadre',
+        name: 'Support & Ancillary Staff',
+        icon: 'fa-handshake-angle',
+        fields: [
+          {
+            key: 'driver_sanctioned',
+            label: 'Driver Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'driver_available',
+            label: 'Driver Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'oa_sanctioned',
+            label: 'Office Attendants (OA) Sanctioned',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'oa_available',
+            label: 'Office Attendants (OA) Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'pts_available',
+            label: 'Part-Time Sweepers (PTS) Available',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '0'
+          },
+          {
+            key: 'other_staff_details',
+            label: 'Other Staff / Deputation / Contract Details',
+            type: 'textarea',
+            grid: 'col-9',
+            placeholder: 'Any additional staff, casual workers, or special arrangements...'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mod_grounds',
+    name: 'Infrastructure & Test Grounds',
+    icon: 'fa-road',
+    sections: [
+      {
+        id: 'sec_grounds_overview',
+        name: 'Ground Ownership & Testing Schedule',
+        icon: 'fa-calendar-days',
+        fields: [
+          {
+            key: 'has_own_ground',
+            label: 'Has Own Dedicated Testing Ground',
+            type: 'boolean',
+            grid: 'col-4',
+            help: 'Check if office owns dedicated ground facility'
+          },
+          {
+            key: 'dl_days',
+            label: 'Driving License (DL) Test Days',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'e.g. Mon, Wed, Fri'
+          },
+          {
+            key: 'cf_days',
+            label: 'Certificate of Fitness (CF) Test Days',
+            type: 'text',
+            grid: 'col-4',
+            placeholder: 'e.g. Tue, Thu, Sat'
+          },
+          {
+            key: 'dl_grounds_count',
+            label: 'DL Grounds Count',
+            type: 'number',
+            grid: 'col-6',
+            placeholder: '1'
+          },
+          {
+            key: 'cf_grounds_count',
+            label: 'CF Grounds Count',
+            type: 'number',
+            grid: 'col-6',
+            placeholder: '1'
+          }
+        ]
+      },
+      {
+        id: 'sec_dl_grounds',
+        name: 'Driving License (DL) Ground Coordinates',
+        icon: 'fa-location-dot',
+        fields: [
+          {
+            key: 'dl_gps_1_raw',
+            label: 'DL Ground 1 GPS Coordinates (Raw / URL)',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'e.g. 8.5201, 76.9402'
+          },
+          {
+            key: 'dl_gps_1_lat',
+            label: 'DL Ground 1 Latitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '8.5201'
+          },
+          {
+            key: 'dl_gps_1_lng',
+            label: 'DL Ground 1 Longitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '76.9402'
+          },
+          {
+            key: 'dl_gps_2_raw',
+            label: 'DL Ground 2 GPS Coordinates',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Alternate DL test location...'
+          },
+          {
+            key: 'dl_gps_3_raw',
+            label: 'DL Ground 3 GPS Coordinates',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Tertiary DL test location...'
+          }
+        ]
+      },
+      {
+        id: 'sec_cf_grounds',
+        name: 'Certificate of Fitness (CF) Ground Coordinates',
+        icon: 'fa-truck-ramp-box',
+        fields: [
+          {
+            key: 'cf_gps_1_raw',
+            label: 'CF Ground 1 GPS Coordinates (Raw / URL)',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'e.g. 8.5301, 76.9350'
+          },
+          {
+            key: 'cf_gps_1_lat',
+            label: 'CF Ground 1 Latitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '8.5301'
+          },
+          {
+            key: 'cf_gps_1_lng',
+            label: 'CF Ground 1 Longitude',
+            type: 'number',
+            grid: 'col-3',
+            placeholder: '76.9350'
+          },
+          {
+            key: 'cf_gps_2_raw',
+            label: 'CF Ground 2 GPS Coordinates',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Alternate CF ground...'
+          },
+          {
+            key: 'cf_gps_3_raw',
+            label: 'CF Ground 3 GPS Coordinates',
+            type: 'text',
+            grid: 'col-6',
+            placeholder: 'Tertiary CF ground...'
+          },
+          {
+            key: 'cf_other_location_details',
+            label: 'Other Testing Location / Ground Lease Details',
+            type: 'textarea',
+            grid: 'col-12',
+            placeholder: 'Notes on leased grounds, local body permissions, or facilities...'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mod_fleet',
+    name: 'Vehicle Fleet & Mobility',
+    icon: 'fa-car-side',
+    sections: [
+      {
+        id: 'sec_fleet_types',
+        name: 'Fleet Composition by Fuel Type',
+        icon: 'fa-gas-pump',
+        fields: [
+          {
+            key: 'vehicles_diesel',
+            label: 'Diesel Department Vehicles',
+            type: 'number',
+            grid: 'col-4',
+            placeholder: '0'
+          },
+          {
+            key: 'vehicles_petrol',
+            label: 'Petrol Department Vehicles',
+            type: 'number',
+            grid: 'col-4',
+            placeholder: '0'
+          },
+          {
+            key: 'vehicles_electric',
+            label: 'Electric Vehicles (EV)',
+            type: 'number',
+            grid: 'col-4',
+            placeholder: '0'
+          }
+        ]
+      },
+      {
+        id: 'sec_aged_fleet',
+        name: 'Aged Fleet Compliance & Condemnation',
+        icon: 'fa-triangle-exclamation',
+        fields: [
+          {
+            key: 'vehicles_over_10_years',
+            label: 'Vehicles Over 10 Years in Active Duty',
+            type: 'number',
+            grid: 'col-6',
+            placeholder: '0',
+            help: 'Subject to scrapping/condemnation audit under green protocol'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mod_finance',
+    name: 'Financial Liabilities & Dues',
+    icon: 'fa-receipt',
+    sections: [
+      {
+        id: 'sec_rent_dues',
+        name: 'Office Rent Liabilities',
+        icon: 'fa-house-lock',
+        fields: [
+          {
+            key: 'rent_dues_amount',
+            label: 'Pending Rent Amount (₹)',
+            type: 'currency',
+            grid: 'col-3',
+            placeholder: '0.00'
+          },
+          {
+            key: 'rent_due_from',
+            label: 'Rent Due From Period',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. April 2023'
+          },
+          {
+            key: 'rent_submitted_on',
+            label: 'Rent Bill Submitted On',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. 15/01/2024'
+          },
+          {
+            key: 'rent_remarks',
+            label: 'Rent Remarks / Notes',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'Landlord / building remarks'
+          }
+        ]
+      },
+      {
+        id: 'sec_repair_dues',
+        name: 'Vehicle Maintenance & Repair Dues',
+        icon: 'fa-wrench',
+        fields: [
+          {
+            key: 'repair_dues_amount',
+            label: 'Pending Repair Dues (₹)',
+            type: 'currency',
+            grid: 'col-3',
+            placeholder: '0.00'
+          },
+          {
+            key: 'repair_due_from',
+            label: 'Repair Due From Period',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. Oct 2023'
+          },
+          {
+            key: 'repair_submitted_on',
+            label: 'Repair Bill Submitted On',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. 20/02/2024'
+          },
+          {
+            key: 'repair_remarks',
+            label: 'Repair Remarks / Workshop Details',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'Authorised workshop / invoice notes'
+          }
+        ]
+      },
+      {
+        id: 'sec_fuel_dues',
+        name: 'Fuel Liabilities & Arrears',
+        icon: 'fa-oil-well',
+        fields: [
+          {
+            key: 'fuel_dues_amount',
+            label: 'Pending Fuel Dues (₹)',
+            type: 'currency',
+            grid: 'col-3',
+            placeholder: '0.00'
+          },
+          {
+            key: 'fuel_due_from',
+            label: 'Fuel Due From Period',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. Nov 2023'
+          },
+          {
+            key: 'fuel_submitted_on',
+            label: 'Fuel Bill Submitted On',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'e.g. 10/03/2024'
+          },
+          {
+            key: 'fuel_remarks',
+            label: 'Fuel Station / Oil PSU Remarks',
+            type: 'text',
+            grid: 'col-3',
+            placeholder: 'Indian Oil / BPCL pump remarks'
+          }
+        ]
+      },
+      {
+        id: 'sec_other_dues',
+        name: 'Other Operational Expenses & Contingencies',
+        icon: 'fa-file-invoice',
+        fields: [
+          {
+            key: 'other_expenses_amount',
+            label: 'Other Contingency Expenses (₹)',
+            type: 'currency',
+            grid: 'col-4',
+            placeholder: '0.00'
+          },
+          {
+            key: 'other_expenses_details',
+            label: 'Details of Other Expenses & Liabilities',
+            type: 'textarea',
+            grid: 'col-8',
+            placeholder: 'Details regarding water, electricity, stationeries, security or pending claims...'
+          }
+        ]
+      }
+    ]
+  }
+];
+
+
 // Export to window
 if (typeof window !== 'undefined') {
   window.RTO_SCHEMA = {
     HEADERS: SHEET_HEADERS,
     INDICES: COLUMN_INDICES,
     MANPOWER_ROLES,
-    TABLE_COLUMN_GROUPS
+    TABLE_COLUMN_GROUPS,
+    EDIT_MODULES: RTO_OFFICE_EDIT_SCHEMA
   };
 }
 if (typeof module !== 'undefined' && module.exports) {
@@ -253,6 +888,7 @@ if (typeof module !== 'undefined' && module.exports) {
     HEADERS: SHEET_HEADERS,
     INDICES: COLUMN_INDICES,
     MANPOWER_ROLES,
-    TABLE_COLUMN_GROUPS
+    TABLE_COLUMN_GROUPS,
+    EDIT_MODULES: RTO_OFFICE_EDIT_SCHEMA
   };
 }
