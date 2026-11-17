@@ -505,8 +505,11 @@
               </div>
             </div>
             <div class="profile-action-buttons">
-              <button class="btn btn-warning btn-sm" id="prof-edit-btn" onclick="window.RTO_APP.openEditOfficeModal()" title="Edit this office record and save changes live in Supabase">
-                <i class="fa-solid fa-pen-to-square"></i> Edit &amp; Update in Supabase
+              <button class="btn btn-warning btn-sm hidden" id="prof-edit-btn" onclick="window.RTO_APP.openEditOfficeModal()" title="Edit this office record and save changes live in Supabase">
+                <i class="fa-solid fa-pen-to-square"></i> Edit Office
+              </button>
+              <button class="btn btn-danger btn-sm hidden" id="prof-delete-btn" onclick="window.RTO_APP.handleDeleteOffice(window.RTO_APP.selectedOffice ? window.RTO_APP.selectedOffice.id : null)" title="Delete this office record from Supabase">
+                <i class="fa-solid fa-trash-can"></i> Delete Office
               </button>
               <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" id="prof-maps-btn">
                 <i class="fa-solid fa-diamond-turn-right"></i> Open in Google Maps
@@ -1338,51 +1341,109 @@
       <section class="app-view hidden" id="view-admin">
         <div class="view-header-row">
           <div>
-            <h2 class="view-title"><i class="fa-solid fa-sliders text-warning"></i> Admin Studio: Schema & Hierarchy Builder</h2>
-            <p class="view-subtitle">Manage top-level administrative Modules, configure sub-Menus, and define granular form Fields with live PostgreSQL synchronization.</p>
+            <h2 class="view-title"><i class="fa-solid fa-sliders text-warning"></i> Admin Studio</h2>
+            <p class="view-subtitle">Manage Regional Transport Offices, edit survey data, configure administrative Modules, and define granular form Fields.</p>
           </div>
           <div class="view-header-actions">
             <span class="badge badge-success" id="admin-db-status-pill"><i class="fa-solid fa-bolt"></i> Supabase Live DB</span>
-            <button class="btn btn-outline btn-sm" onclick="window.RTO_APP.renderAdminView()">
-              <i class="fa-solid fa-rotate"></i> Reload Hierarchy
+            <button class="btn btn-outline btn-sm" onclick="window.RTO_APP.refreshData()">
+              <i class="fa-solid fa-rotate"></i> Refresh DB
             </button>
-            <button class="btn btn-primary btn-sm" onclick="window.RTO_APP.openModuleModal()">
-              <i class="fa-solid fa-plus"></i> Add New Module
+            <button class="btn btn-primary btn-sm" onclick="window.RTO_APP.openAddOfficeModal()" id="btn-admin-add-office">
+              <i class="fa-solid fa-plus"></i> Add New Office
             </button>
           </div>
         </div>
 
-        <!-- Admin Studio KPI Stats Bar -->
-        <div class="admin-stats-bar">
-          <div class="admin-stat-chip">
-            <div class="chip-icon bg-blue-subtle text-primary"><i class="fa-solid fa-cubes"></i></div>
-            <div class="chip-details">
-              <span class="stat-number" id="stat-total-modules">5</span>
-              <span class="stat-label">Modules</span>
+        <!-- Studio Sub-Navigation Tabs -->
+        <div class="admin-mode-tabs-bar">
+          <button type="button" class="admin-mode-tab-btn active" id="tab-btn-admin-offices" onclick="window.RTO_APP.switchAdminStudioTab('offices')">
+            <i class="fa-solid fa-building-flag"></i> Office Management (<span id="admin-office-count-badge">100</span>)
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-schema" onclick="window.RTO_APP.switchAdminStudioTab('schema')">
+            <i class="fa-solid fa-sliders"></i> Schema &amp; Hierarchy Builder
+          </button>
+        </div>
+
+        <!-- TAB 1: Office Management Panel -->
+        <div id="admin-studio-offices-panel">
+          <div class="admin-office-toolbar">
+            <div class="search-box flex-grow">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="admin-offices-search-input" class="form-control" placeholder="Search office name, district, or code..." oninput="window.RTO_APP.renderAdminOfficesTable()">
             </div>
+            <div class="filter-select-group">
+              <select id="admin-offices-district-filter" class="form-control" onchange="window.RTO_APP.renderAdminOfficesTable()">
+                <option value="">All Districts (14)</option>
+              </select>
+            </div>
+            <div class="filter-select-group">
+              <select id="admin-offices-building-filter" class="form-control" onchange="window.RTO_APP.renderAdminOfficesTable()">
+                <option value="">All Building Types</option>
+                <option value="Government Building">Government Building</option>
+                <option value="Rented">Rented</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.RTO_APP.openAddOfficeModal()">
+              <i class="fa-solid fa-plus"></i> New Office
+            </button>
           </div>
-          <div class="admin-stat-chip">
-            <div class="chip-icon bg-gold-subtle text-warning"><i class="fa-solid fa-list-check"></i></div>
-            <div class="chip-details">
-              <span class="stat-number" id="stat-total-menus">11</span>
-              <span class="stat-label">Sub-Menus</span>
-            </div>
-          </div>
-          <div class="admin-stat-chip">
-            <div class="chip-icon bg-emerald-subtle text-success"><i class="fa-solid fa-pen-ruler"></i></div>
-            <div class="chip-details">
-              <span class="stat-number" id="stat-total-fields">62</span>
-              <span class="stat-label">Dynamic Fields</span>
-            </div>
-          </div>
-          <div class="admin-stat-chip flex-grow">
-            <div class="chip-icon bg-purple-subtle text-purple"><i class="fa-solid fa-diagram-project"></i></div>
-            <div class="hierarchy-breadcrumb-box">
-              <span class="stat-label">ACTIVE DRILLDOWN:</span>
-              <span class="hierarchy-crumb" id="admin-crumb-trail">All Modules &gt; Select a Menu</span>
-            </div>
+
+          <div class="table-container mt-3">
+            <table class="data-table" id="admin-offices-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>Office Name</th>
+                  <th>District</th>
+                  <th>Building & Area</th>
+                  <th>RTO / JRTO Incharge</th>
+                  <th>Staff (San/Avail)</th>
+                  <th>Vehicles</th>
+                  <th>Rent & Liabilities</th>
+                  <th style="text-align: right; min-width: 170px;">Admin Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-offices-tbody">
+                <!-- Dynamically populated rows with Edit and Delete buttons -->
+              </tbody>
+            </table>
           </div>
         </div>
+
+        <!-- TAB 2: Schema & CMS Builder Panel -->
+        <div id="admin-studio-schema-panel" class="hidden">
+          <!-- Admin Studio KPI Stats Bar -->
+          <div class="admin-stats-bar">
+            <div class="admin-stat-chip">
+              <div class="chip-icon bg-blue-subtle text-primary"><i class="fa-solid fa-cubes"></i></div>
+              <div class="chip-details">
+                <span class="stat-number" id="stat-total-modules">5</span>
+                <span class="stat-label">Modules</span>
+              </div>
+            </div>
+            <div class="admin-stat-chip">
+              <div class="chip-icon bg-gold-subtle text-warning"><i class="fa-solid fa-list-check"></i></div>
+              <div class="chip-details">
+                <span class="stat-number" id="stat-total-menus">11</span>
+                <span class="stat-label">Sub-Menus</span>
+              </div>
+            </div>
+            <div class="admin-stat-chip">
+              <div class="chip-icon bg-emerald-subtle text-success"><i class="fa-solid fa-pen-ruler"></i></div>
+              <div class="chip-details">
+                <span class="stat-number" id="stat-total-fields">62</span>
+                <span class="stat-label">Dynamic Fields</span>
+              </div>
+            </div>
+            <div class="admin-stat-chip flex-grow">
+              <div class="chip-icon bg-purple-subtle text-purple"><i class="fa-solid fa-diagram-project"></i></div>
+              <div class="hierarchy-breadcrumb-box">
+                <span class="stat-label">ACTIVE DRILLDOWN:</span>
+                <span class="hierarchy-crumb" id="admin-crumb-trail">All Modules &gt; Select a Menu</span>
+              </div>
+            </div>
+          </div>
 
         <!-- 3-Column Studio Hierarchy Workbench -->
         <div class="admin-workbench-grid">
@@ -1458,6 +1519,7 @@
             </div>
           </div>
 
+        </div>
         </div>
       </section>
 
@@ -1811,6 +1873,131 @@
           <button type="button" class="btn btn-outline" onclick="window.RTO_APP.closeModal('modal-edit-office')">Cancel</button>
           <button type="submit" class="btn btn-warning" id="btn-submit-update-office">
             <i class="fa-solid fa-cloud-arrow-up"></i> Save &amp; Update in Supabase
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add New Office Record -->
+  <div class="modal-overlay hidden" id="modal-add-office">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-building-circle-arrow-right text-primary"></i>
+          <div>
+            <h3>Add New Office Record</h3>
+            <span class="text-xs text-muted">Direct PostgreSQL insert into Supabase <code>public.rto_offices</code></span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="window.RTO_APP.closeModal('modal-add-office')">×</button>
+      </div>
+      <form id="add-office-form" onsubmit="window.RTO_APP.handleCreateOffice(event)">
+        <div class="modal-body modal-scrollable">
+          <div class="form-dynamic-grid">
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">District <span class="text-danger">*</span></label>
+              <select id="add-office-district" class="form-control" required>
+                <option value="">-- Choose District --</option>
+                <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                <option value="Kollam">Kollam</option>
+                <option value="Pathanamthitta">Pathanamthitta</option>
+                <option value="Alappuzha">Alappuzha</option>
+                <option value="Kottayam">Kottayam</option>
+                <option value="Idukki">Idukki</option>
+                <option value="Ernakulam">Ernakulam</option>
+                <option value="Thrissur">Thrissur</option>
+                <option value="Palakkad">Palakkad</option>
+                <option value="Malappuram">Malappuram</option>
+                <option value="Kozhikode">Kozhikode</option>
+                <option value="Wayanad">Wayanad</option>
+                <option value="Kannur">Kannur</option>
+                <option value="Kasaragod">Kasaragod</option>
+              </select>
+            </div>
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">Office Name <span class="text-danger">*</span></label>
+              <input type="text" id="add-office-name" class="form-control" placeholder="e.g. KL75, Sub RTO ..." required>
+            </div>
+            <div class="form-group col-4">
+              <label class="font-bold text-sm">Building Type</label>
+              <select id="add-office-building" class="form-control">
+                <option value="Government Building">Government Building</option>
+                <option value="Rented">Rented</option>
+              </select>
+            </div>
+            <div class="form-group col-4">
+              <label class="font-bold text-sm">Year Functioning</label>
+              <input type="text" id="add-office-year" class="form-control" placeholder="e.g. 2024">
+            </div>
+            <div class="form-group col-4">
+              <label class="font-bold text-sm">Office Area (Sq Ft)</label>
+              <input type="number" id="add-office-area" class="form-control" placeholder="e.g. 2500">
+            </div>
+            <div class="form-group col-12">
+              <label class="font-bold text-sm">GPS Location / Coordinates / Maps URL</label>
+              <input type="text" id="add-office-gps" class="form-control" placeholder="Google Maps link or Lat, Lng coordinates">
+            </div>
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">RTO / Incharge Name</label>
+              <input type="text" id="add-office-rto-name" class="form-control" placeholder="Full name">
+            </div>
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">RTO Mobile</label>
+              <input type="tel" id="add-office-rto-mobile" class="form-control" placeholder="94470XXXXX">
+            </div>
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">JRTO Name</label>
+              <input type="text" id="add-office-jrto-name" class="form-control" placeholder="Full name">
+            </div>
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">JRTO Mobile</label>
+              <input type="tel" id="add-office-jrto-mobile" class="form-control" placeholder="94470XXXXX">
+            </div>
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">Landline / PRO Contact</label>
+              <input type="text" id="add-office-landline" class="form-control" placeholder="0471-XXXXXXX">
+            </div>
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">DTC / In Charge</label>
+              <input type="text" id="add-office-dtc-name" class="form-control" placeholder="DTC Officer name">
+            </div>
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">MVI Sanctioned / Available</label>
+              <div class="d-flex gap-2">
+                <input type="number" id="add-office-mvi-sanc" class="form-control" placeholder="Sanc" value="2">
+                <input type="number" id="add-office-mvi-avail" class="form-control" placeholder="Avail" value="2">
+              </div>
+            </div>
+            <div class="form-group col-6">
+              <label class="font-bold text-sm">AMVI Sanctioned / Available</label>
+              <div class="d-flex gap-2">
+                <input type="number" id="add-office-amvi-sanc" class="form-control" placeholder="Sanc" value="4">
+                <input type="number" id="add-office-amvi-avail" class="form-control" placeholder="Avail" value="4">
+              </div>
+            </div>
+            <div class="form-group col-4">
+              <label class="font-bold text-sm">Rent Dues (₹)</label>
+              <input type="number" id="add-office-rent-dues" class="form-control" placeholder="0">
+            </div>
+            <div class="form-group col-4">
+              <label class="font-bold text-sm">Repair Dues (₹)</label>
+              <input type="number" id="add-office-repair-dues" class="form-control" placeholder="0">
+            </div>
+            <div class="form-group col-4">
+              <label class="font-bold text-sm">Fuel Dues (₹)</label>
+              <input type="number" id="add-office-fuel-dues" class="form-control" placeholder="0">
+            </div>
+            <div class="form-group col-12">
+              <label class="font-bold text-sm">Remarks / Notes</label>
+              <textarea id="add-office-remarks" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="window.RTO_APP.closeModal('modal-add-office')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-add-office">
+            <i class="fa-solid fa-plus-circle"></i> Create Office in Supabase
           </button>
         </div>
       </form>

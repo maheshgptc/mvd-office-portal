@@ -563,6 +563,55 @@ class SupabaseService {
     return data && data[0] ? data[0] : payload;
   }
 
+  /**
+   * Create a new Office record directly in public.rto_offices
+   */
+  async createOffice(officeRecord) {
+    if (!this.client) this.initClient();
+    if (!this.client) throw new Error('Supabase client not initialized.');
+
+    const payload = {
+      ...officeRecord,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await this.client
+      .from(this.config.tableName)
+      .insert([payload])
+      .select();
+
+    if (error) {
+      console.error('Supabase createOffice error:', error);
+      throw error;
+    }
+
+    await this.loadData(true);
+    return data && data[0] ? data[0] : payload;
+  }
+
+  /**
+   * Delete an Office record directly from public.rto_offices
+   */
+  async deleteOffice(officeId) {
+    if (!this.client) this.initClient();
+    if (!this.client) throw new Error('Supabase client not initialized.');
+
+    const { error } = await this.client
+      .from(this.config.tableName)
+      .delete()
+      .eq('id', officeId);
+
+    if (error) {
+      console.error('Supabase deleteOffice error:', error);
+      throw error;
+    }
+
+    // Refresh local cache and trigger realtime state update
+    await this.loadData(true);
+    return true;
+  }
+
   /* =========================================================================
      ADMIN & CMS SCHEMA MANAGEMENT (MODULES -> MENUS -> FIELDS)
      ========================================================================= */

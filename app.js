@@ -58,6 +58,7 @@ class RTOApp {
 
     // Admin & CMS Workbench State
     this.adminSession = null;
+    this.adminStudioActiveTab = 'offices';
     this.modules = [];
     this.menus = [];
     this.fields = [];
@@ -1997,6 +1998,9 @@ class RTOApp {
     const userName = document.getElementById('admin-user-name');
     const userRole = document.getElementById('admin-user-role');
     const lockBadge = document.getElementById('admin-lock-badge');
+    const profEditBtn = document.getElementById('prof-edit-btn');
+    const profDeleteBtn = document.getElementById('prof-delete-btn');
+    const addOfficeBtn = document.getElementById('btn-admin-add-office');
 
     if (this.adminSession) {
       if (banner) banner.classList.remove('hidden');
@@ -2005,16 +2009,22 @@ class RTOApp {
       if (userName) userName.textContent = this.adminSession.full_name || this.adminSession.email;
       if (userRole) userRole.textContent = (this.adminSession.role || 'ADMIN').toUpperCase();
       if (lockBadge) lockBadge.innerHTML = '<i class="fa-solid fa-unlock text-emerald-400"></i>';
+      if (profEditBtn) profEditBtn.classList.remove('hidden');
+      if (profDeleteBtn) profDeleteBtn.classList.remove('hidden');
+      if (addOfficeBtn) addOfficeBtn.classList.remove('hidden');
     } else {
       if (banner) banner.classList.add('hidden');
       if (loginBtn) loginBtn.classList.remove('hidden');
       if (userPill) userPill.classList.add('hidden');
       if (lockBadge) lockBadge.innerHTML = '<i class="fa-solid fa-lock"></i>';
+      if (profEditBtn) profEditBtn.classList.add('hidden');
+      if (profDeleteBtn) profDeleteBtn.classList.add('hidden');
+      if (addOfficeBtn) addOfficeBtn.classList.add('hidden');
     }
   }
 
   // =========================================================================
-  // VIEW 12: ADMIN STUDIO (DYNAMIC CMS FOR MODULES, MENUS & FIELDS)
+  // VIEW 12: ADMIN STUDIO (DYNAMIC CMS FOR MODULES, MENUS, FIELDS & OFFICES)
   // =========================================================================
   async renderAdminView() {
     try {
@@ -2026,6 +2036,7 @@ class RTOApp {
       this.setElText('stat-total-modules', this.modules.length);
       this.setElText('stat-total-menus', this.menus.length);
       this.setElText('stat-total-fields', this.fields.length);
+      this.setElText('admin-office-count-badge', this.allOffices.length);
 
       // Verify active module
       if (!this.selectedModuleId || !this.modules.some(m => m.id === this.selectedModuleId)) {
@@ -2038,10 +2049,13 @@ class RTOApp {
         this.selectedMenuId = currentModuleMenus.length > 0 ? currentModuleMenus[0].id : null;
       }
 
+      this.populateAdminDistrictFilter();
+      this.renderAdminOfficesTable();
       this.renderModulesCol();
       this.renderMenusCol();
       this.renderFieldsCol();
       this.updateAdminBreadcrumbs();
+      this.switchAdminStudioTab(this.adminStudioActiveTab || 'offices');
 
     } catch (err) {
       console.error('Failed to render Admin Studio:', err);
@@ -2049,6 +2063,284 @@ class RTOApp {
       if (container) {
         container.innerHTML = `<div class="alert-box alert-danger">Failed to load CMS schema: ${err.message}</div>`;
       }
+    }
+  }
+
+  switchAdminStudioTab(tab) {
+    this.adminStudioActiveTab = tab;
+    const officesTabBtn = document.getElementById('tab-btn-admin-offices');
+    const schemaTabBtn = document.getElementById('tab-btn-admin-schema');
+    const officesPanel = document.getElementById('admin-studio-offices-panel');
+    const schemaPanel = document.getElementById('admin-studio-schema-panel');
+
+    if (tab === 'offices') {
+      if (officesTabBtn) officesTabBtn.classList.add('active');
+      if (schemaTabBtn) schemaTabBtn.classList.remove('active');
+      if (officesPanel) officesPanel.classList.remove('hidden');
+      if (schemaPanel) schemaPanel.classList.add('hidden');
+      this.renderAdminOfficesTable();
+    } else {
+      if (officesTabBtn) officesTabBtn.classList.remove('active');
+      if (schemaTabBtn) schemaTabBtn.classList.add('active');
+      if (officesPanel) officesPanel.classList.add('hidden');
+      if (schemaPanel) schemaPanel.classList.remove('hidden');
+    }
+  }
+
+  populateAdminDistrictFilter() {
+    const sel = document.getElementById('admin-offices-district-filter');
+    if (!sel) return;
+    const currentVal = sel.value;
+    const districts = [...new Set(this.allOffices.map(o => o.district))].filter(Boolean).sort();
+    sel.innerHTML = `<option value="">All Districts (${districts.length})</option>` +
+      districts.map(d => `<option value="${d}" ${d === currentVal ? 'selected' : ''}>${d}</option>`).join('');
+  }
+
+  renderAdminOfficesTable() {
+    const tbody = document.getElementById('admin-offices-tbody');
+    const badge = document.getElementById('admin-office-count-badge');
+    if (badge) badge.textContent = this.allOffices.length;
+    if (!tbody) return;
+
+    const search = (document.getElementById('admin-offices-search-input')?.value || '').toLowerCase().trim();
+    const districtFilter = document.getElementById('admin-offices-district-filter')?.value || '';
+    const buildingFilter = document.getElementById('admin-offices-building-filter')?.value || '';
+
+    let list = this.allOffices.filter(o => {
+      if (districtFilter && o.district !== districtFilter) return false;
+      if (buildingFilter && o.buildingType !== buildingFilter) return false;
+      if (search) {
+        const str = `${o.officeName} ${o.district} ${o.id} ${o.rtoName} ${o.jrtoName}`.toLowerCase();
+        if (!str.includes(search)) return false;
+      }
+      return true;
+    });
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">No offices found matching search criteria.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map((off, idx) => `
+      <tr>
+        <td class="text-xs text-muted">${idx + 1}</td>
+        <td>
+          <a href="#" class="font-bold text-navy" onclick="window.RTO_APP.openOfficeProfile('${off.id}'); return false;">
+            ${off.officeName}
+          </a>
+          <div class="text-xs text-muted"><code>${off.id}</code></div>
+        </td>
+        <td><span class="badge badge-subtle">${off.district}</span></td>
+        <td>
+          <div>${off.buildingType}</div>
+          <div class="text-xs text-muted">${off.totalArea ? Number(off.totalArea).toLocaleString() + ' sq ft' : '—'}</div>
+        </td>
+        <td>
+          <div class="text-xs"><strong>RTO:</strong> ${off.rtoName || 'N/A'}</div>
+          <div class="text-xs"><strong>JRTO:</strong> ${off.jrtoName || 'N/A'}</div>
+        </td>
+        <td>
+          <div class="text-xs"><strong>Sanctioned:</strong> ${off.totalSanctioned}</div>
+          <div class="text-xs"><strong>Available:</strong> ${off.totalAvailable}</div>
+        </td>
+        <td>
+          <span class="badge badge-neutral text-xs">${off.totalVehicles} Vehicles</span>
+        </td>
+        <td>
+          <div class="text-xs text-danger font-bold">${DataAdapter.formatCurrency(off.rentDues)}</div>
+          <div class="text-xs text-muted">${off.rentDues > 0 ? (off.rentDueFrom || 'Pending') : 'No Dues'}</div>
+        </td>
+        <td style="text-align: right;">
+          <div class="table-actions-cell" style="justify-content: flex-end;">
+            <button class="btn btn-xs btn-outline" onclick="window.RTO_APP.openOfficeProfile('${off.id}')" title="View Office Profile">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button class="btn btn-xs btn-warning" onclick="window.RTO_APP.openEditOfficeModal('${off.id}')" title="Edit Office Data in Supabase">
+              <i class="fa-solid fa-pen-to-square"></i> Edit
+            </button>
+            <button class="btn btn-xs btn-danger" onclick="window.RTO_APP.handleDeleteOffice('${off.id}')" title="Permanently Delete Office from Supabase">
+              <i class="fa-solid fa-trash-can"></i> Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  openAddOfficeModal() {
+    if (!this.adminSession) {
+      this.openAdminLoginModal();
+      return;
+    }
+    const modal = document.getElementById('modal-add-office');
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  async handleCreateOffice(event) {
+    if (event) event.preventDefault();
+
+    if (!this.adminSession) {
+      this.openAdminLoginModal();
+      return;
+    }
+
+    const district = document.getElementById('add-office-district')?.value.trim();
+    const officeName = document.getElementById('add-office-name')?.value.trim();
+
+    if (!district || !officeName) {
+      alert('Please select District and enter Office Name.');
+      return;
+    }
+
+    const submitBtn = document.getElementById('btn-submit-add-office');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating in Supabase...';
+    }
+
+    try {
+      const buildingType = document.getElementById('add-office-building')?.value || 'Government Building';
+      const year = document.getElementById('add-office-year')?.value.trim() || '';
+      const area = parseFloat(document.getElementById('add-office-area')?.value) || 0;
+      const gpsRaw = document.getElementById('add-office-gps')?.value.trim() || '';
+      const rtoName = document.getElementById('add-office-rto-name')?.value.trim() || '';
+      const rtoMobile = document.getElementById('add-office-rto-mobile')?.value.trim() || '';
+      const jrtoName = document.getElementById('add-office-jrto-name')?.value.trim() || '';
+      const jrtoMobile = document.getElementById('add-office-jrto-mobile')?.value.trim() || '';
+      const landline = document.getElementById('add-office-landline')?.value.trim() || '';
+      const dtcName = document.getElementById('add-office-dtc-name')?.value.trim() || '';
+      const mviSanc = parseInt(document.getElementById('add-office-mvi-sanc')?.value, 10) || 0;
+      const mviAvail = parseInt(document.getElementById('add-office-mvi-avail')?.value, 10) || 0;
+      const amviSanc = parseInt(document.getElementById('add-office-amvi-sanc')?.value, 10) || 0;
+      const amviAvail = parseInt(document.getElementById('add-office-amvi-avail')?.value, 10) || 0;
+      const rentDues = parseFloat(document.getElementById('add-office-rent-dues')?.value) || 0;
+      const repairDues = parseFloat(document.getElementById('add-office-repair-dues')?.value) || 0;
+      const fuelDues = parseFloat(document.getElementById('add-office-fuel-dues')?.value) || 0;
+      const remarks = document.getElementById('add-office-remarks')?.value.trim() || '';
+
+      const gpsCoords = DataAdapter.extractCoordinates(gpsRaw);
+      const nextIndex = this.allOffices.length + 1;
+      const id = `office-${nextIndex}-${district.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${officeName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+
+      const newOfficeRecord = {
+        id,
+        timestamp: new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+        district,
+        office_name: officeName,
+        year_of_functioning: year,
+        building_type: buildingType,
+        total_office_area: area,
+        office_gps_raw: gpsRaw,
+        office_latitude: gpsCoords.lat,
+        office_longitude: gpsCoords.lng,
+        has_own_ground: false,
+        dl_days: 'Not Specified',
+        cf_days: 'Not Specified',
+        dl_grounds_count: 0,
+        cf_grounds_count: 0,
+        dl_gps_1_raw: 'Location unavailable',
+        dl_gps_2_raw: 'Location unavailable',
+        dl_gps_3_raw: 'Location unavailable',
+        cf_gps_1_raw: 'Location unavailable',
+        cf_gps_2_raw: 'Location unavailable',
+        cf_gps_3_raw: 'Location unavailable',
+        cf_other_location_details: '',
+        rto_name: rtoName,
+        rto_mobile: rtoMobile,
+        jrto_name: jrtoName,
+        jrto_mobile: jrtoMobile,
+        landline_pro: landline,
+        rto_available: Boolean(rtoName),
+        jrto_available: Boolean(jrtoName),
+        dtc_name: dtcName,
+        dtc_mobile: '',
+        mvi_sanctioned: mviSanc,
+        mvi_available: mviAvail,
+        amvi_sanctioned: amviSanc,
+        amvi_available: amviAvail,
+        ss_sanctioned: 0,
+        ss_available: 0,
+        js_sanctioned: 0,
+        js_available: 0,
+        clerk_sanctioned: 0,
+        clerk_available: 0,
+        ha_pro_sanctioned: 0,
+        ha_pro_available: 0,
+        driver_sanctioned: 0,
+        driver_available: 0,
+        oa_sanctioned: 0,
+        oa_available: 0,
+        pts_available: 0,
+        other_staff_details: remarks,
+        vehicles_diesel: 0,
+        vehicles_petrol: 0,
+        vehicles_electric: 0,
+        vehicles_over_10_years: 0,
+        rent_dues_amount: rentDues,
+        rent_due_from: '',
+        rent_submitted_on: '',
+        rent_remarks: remarks,
+        repair_dues_amount: repairDues,
+        repair_due_from: '',
+        repair_submitted_on: '',
+        repair_remarks: '',
+        fuel_dues_amount: fuelDues,
+        fuel_due_from: '',
+        fuel_submitted_on: '',
+        fuel_remarks: '',
+        other_expenses_details: '',
+        other_expenses_amount: 0,
+        raw_payload: {},
+        custom_fields: {}
+      };
+
+      await this.supabaseService.createOffice(newOfficeRecord);
+
+      this.closeModal('modal-add-office');
+      alert(`✓ Successfully created office "${officeName}" in Supabase PostgreSQL!`);
+      this.renderAdminOfficesTable();
+
+    } catch (err) {
+      console.error('Failed to create office:', err);
+      alert(`Error creating office in Supabase: ${err.message}`);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Create Office in Supabase';
+      }
+    }
+  }
+
+  async handleDeleteOffice(officeId) {
+    if (!this.adminSession) {
+      this.openAdminLoginModal();
+      return;
+    }
+
+    const office = this.allOffices.find(o => o.id === officeId);
+    const officeName = office ? office.officeName : officeId;
+
+    if (!confirm(`Are you sure you want to PERMANENTLY DELETE the office record for "${officeName}"?\n\nThis will remove the record directly from Supabase PostgreSQL public.rto_offices.`)) {
+      return;
+    }
+
+    try {
+      await this.supabaseService.deleteOffice(officeId);
+      this.allOffices = this.allOffices.filter(o => o.id !== officeId);
+      this.applyFilters();
+
+      if (this.selectedOffice && this.selectedOffice.id === officeId) {
+        this.selectedOffice = null;
+        this.navigateTo('admin');
+      } else if (this.currentView === 'admin') {
+        this.renderAdminOfficesTable();
+      } else {
+        this.renderCurrentView();
+      }
+      alert(`✓ Successfully deleted "${officeName}" from Supabase database.`);
+    } catch (err) {
+      console.error('Failed to delete office:', err);
+      alert(`Error deleting office from Supabase: ${err.message}`);
     }
   }
 
@@ -2691,6 +2983,11 @@ class RTOApp {
   // OFFICE SURVEY DATA EDITING & LIVE SUPABASE WRITE
   // =========================================================================
   async openEditOfficeModal(officeId = null) {
+    if (!this.adminSession) {
+      this.openAdminLoginModal();
+      return;
+    }
+
     this.editingOfficeId = officeId || (this.selectedOffice ? this.selectedOffice.id : null);
     if (!this.editingOfficeId && this.allOffices.length > 0) {
       this.editingOfficeId = this.allOffices[0].id;
@@ -2722,6 +3019,10 @@ class RTOApp {
     if (subtitleEl) subtitleEl.textContent = `District: ${office.district} • Direct PostgreSQL write to Supabase table public.rto_offices`;
     if (hiddenIdEl) hiddenIdEl.value = office.id;
 
+    if (!this.editOfficeActiveModuleId || !this.modules.some(m => m.id === this.editOfficeActiveModuleId)) {
+      this.editOfficeActiveModuleId = this.modules.length > 0 ? this.modules[0].id : 'mod_infra';
+    }
+
     // Render Module tabs
     this.renderEditOfficeTabs();
 
@@ -2752,7 +3053,14 @@ class RTOApp {
   switchEditOfficeModuleTab(moduleId) {
     this.editOfficeActiveModuleId = moduleId;
     this.renderEditOfficeTabs();
-    this.renderEditOfficeFormBody();
+    const panels = document.querySelectorAll('#edit-office-form-body .edit-office-module-panel');
+    panels.forEach(p => {
+      if (p.id === `edit-mod-panel-${moduleId}`) {
+        p.classList.remove('hidden');
+      } else {
+        p.classList.add('hidden');
+      }
+    });
   }
 
   renderEditOfficeFormBody() {
@@ -2762,119 +3070,127 @@ class RTOApp {
     const office = this.allOffices.find(o => o.id === this.editingOfficeId);
     if (!office) return;
 
-    const activeMod = this.modules.find(m => m.id === this.editOfficeActiveModuleId);
-    const modMenus = this.menus.filter(m => m.module_id === this.editOfficeActiveModuleId);
+    bodyEl.innerHTML = this.modules.map(mod => {
+      const isVisible = mod.id === this.editOfficeActiveModuleId;
+      const modMenus = this.menus.filter(m => m.module_id === mod.id);
 
-    if (modMenus.length === 0) {
-      bodyEl.innerHTML = `
-        <div class="empty-workbench-notice">
-          <i class="fa-solid fa-list-check"></i>
-          <p>No sub-sections configured under ${activeMod ? activeMod.name : 'this module'}.</p>
-        </div>
-      `;
-      return;
-    }
+      let contentHtml = '';
+      if (modMenus.length === 0) {
+        contentHtml = `
+          <div class="empty-workbench-notice">
+            <i class="fa-solid fa-list-check"></i>
+            <p>No sub-sections configured under ${mod.name}.</p>
+          </div>
+        `;
+      } else {
+        contentHtml = modMenus.map(menu => {
+          const menuFields = this.fields.filter(f => f.menu_id === menu.id);
 
-    bodyEl.innerHTML = modMenus.map(menu => {
-      const menuFields = this.fields.filter(f => f.menu_id === menu.id);
+          return `
+            <div class="edit-menu-section">
+              <div class="edit-menu-section-header">
+                <i class="fa-solid ${menu.icon || 'fa-list-check'}"></i>
+                <span>${menu.name}</span>
+                <span class="badge badge-subtle ml-auto text-xs">${menuFields.length} fields</span>
+              </div>
+
+              <div class="form-dynamic-grid">
+                ${menuFields.length === 0 ? '<p class="text-xs text-muted">No fields configured in this section.</p>' : ''}
+                ${menuFields.map(fld => {
+                  const gridCol = fld.grid_width || 'col-6';
+                  const reqStar = fld.is_required ? '<span class="field-required-star">*</span>' : '';
+                  
+                  // Get current value from office object or rawPayload or customFields
+                  let currentVal = '';
+                  const key = fld.field_key;
+                  if (office[key] !== undefined && office[key] !== null) {
+                    currentVal = office[key];
+                  } else if (office.rawPayload && office.rawPayload[key] !== undefined) {
+                    currentVal = office.rawPayload[key];
+                  } else if (office.customFields && office.customFields[key] !== undefined) {
+                    currentVal = office.customFields[key];
+                  } else {
+                    currentVal = fld.default_value || '';
+                  }
+
+                  let inputHtml = '';
+                  switch (fld.data_type) {
+                    case 'number':
+                      inputHtml = `<input type="number" class="form-control" data-key="${key}" data-type="number" value="${currentVal}" placeholder="${fld.placeholder || '0'}" ${fld.is_required ? 'required' : ''}>`;
+                      break;
+                    case 'currency':
+                      inputHtml = `
+                        <div class="input-with-icon-preview">
+                          <span class="icon-preview-box text-bold" style="left: 12px; right: auto;">₹</span>
+                          <input type="number" class="form-control" style="padding-left: 32px;" data-key="${key}" data-type="currency" value="${currentVal}" placeholder="${fld.placeholder || '0.00'}" ${fld.is_required ? 'required' : ''}>
+                        </div>
+                      `;
+                      break;
+                    case 'select':
+                      const opts = Array.isArray(fld.options) ? fld.options : [];
+                      inputHtml = `
+                        <select class="form-control" data-key="${key}" data-type="select" ${fld.is_required ? 'required' : ''}>
+                          <option value="">-- Choose Option --</option>
+                          ${opts.map(o => `<option value="${o}" ${String(currentVal).toLowerCase() === String(o).toLowerCase() ? 'selected' : ''}>${o}</option>`).join('')}
+                        </select>
+                      `;
+                      break;
+                    case 'boolean':
+                      const isChecked = currentVal === true || currentVal === 'true' || currentVal === 1 || currentVal === 'yes';
+                      inputHtml = `
+                        <div class="mt-2">
+                          <label class="checkbox-label">
+                            <input type="checkbox" data-key="${key}" data-type="boolean" ${isChecked ? 'checked' : ''}>
+                            <span>Yes / Confirmed</span>
+                          </label>
+                        </div>
+                      `;
+                      break;
+                    case 'date':
+                      inputHtml = `<input type="date" class="form-control" data-key="${key}" data-type="date" value="${currentVal}" ${fld.is_required ? 'required' : ''}>`;
+                      break;
+                    case 'phone':
+                      inputHtml = `
+                        <div class="input-with-icon-preview">
+                          <input type="tel" class="form-control" data-key="${key}" data-type="phone" value="${currentVal}" placeholder="${fld.placeholder || '94470XXXXX'}" ${fld.is_required ? 'required' : ''}>
+                          <span class="icon-preview-box"><i class="fa-solid fa-phone"></i></span>
+                        </div>
+                      `;
+                      break;
+                    case 'gps_coordinates':
+                      inputHtml = `
+                        <div class="input-with-icon-preview">
+                          <input type="text" class="form-control" data-key="${key}" data-type="gps_coordinates" value="${currentVal}" placeholder="${fld.placeholder || 'Latitude, Longitude'}" ${fld.is_required ? 'required' : ''}>
+                          <span class="icon-preview-box text-danger"><i class="fa-solid fa-location-dot"></i></span>
+                        </div>
+                      `;
+                      break;
+                    case 'textarea':
+                      inputHtml = `<textarea class="form-control" rows="2" data-key="${key}" data-type="textarea" placeholder="${fld.placeholder || 'Remarks...'}" ${fld.is_required ? 'required' : ''}>${currentVal}</textarea>`;
+                      break;
+                    case 'text':
+                    default:
+                      inputHtml = `<input type="text" class="form-control" data-key="${key}" data-type="text" value="${currentVal}" placeholder="${fld.placeholder || ''}" ${fld.is_required ? 'required' : ''}>`;
+                      break;
+                  }
+
+                  return `
+                    <div class="form-group ${gridCol}">
+                      <label class="font-bold text-sm">${fld.label} ${reqStar}</label>
+                      ${inputHtml}
+                      ${fld.help_text ? `<span class="text-xs text-muted mt-1 display-block">${fld.help_text}</span>` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
 
       return `
-        <div class="edit-menu-section">
-          <div class="edit-menu-section-header">
-            <i class="fa-solid ${menu.icon || 'fa-list-check'}"></i>
-            <span>${menu.name}</span>
-            <span class="badge badge-subtle ml-auto text-xs">${menuFields.length} fields</span>
-          </div>
-
-          <div class="form-dynamic-grid">
-            ${menuFields.length === 0 ? '<p class="text-xs text-muted">No fields configured in this section.</p>' : ''}
-            ${menuFields.map(fld => {
-              const gridCol = fld.grid_width || 'col-6';
-              const reqStar = fld.is_required ? '<span class="field-required-star">*</span>' : '';
-              
-              // Get current value from office object or rawPayload or customFields
-              let currentVal = '';
-              const key = fld.field_key;
-              if (office[key] !== undefined && office[key] !== null) {
-                currentVal = office[key];
-              } else if (office.rawPayload && office.rawPayload[key] !== undefined) {
-                currentVal = office.rawPayload[key];
-              } else if (office.customFields && office.customFields[key] !== undefined) {
-                currentVal = office.customFields[key];
-              } else {
-                currentVal = fld.default_value || '';
-              }
-
-              let inputHtml = '';
-              switch (fld.data_type) {
-                case 'number':
-                  inputHtml = `<input type="number" class="form-control" data-key="${key}" data-type="number" value="${currentVal}" placeholder="${fld.placeholder || '0'}" ${fld.is_required ? 'required' : ''}>`;
-                  break;
-                case 'currency':
-                  inputHtml = `
-                    <div class="input-with-icon-preview">
-                      <span class="icon-preview-box text-bold" style="left: 12px; right: auto;">₹</span>
-                      <input type="number" class="form-control" style="padding-left: 32px;" data-key="${key}" data-type="currency" value="${currentVal}" placeholder="${fld.placeholder || '0.00'}" ${fld.is_required ? 'required' : ''}>
-                    </div>
-                  `;
-                  break;
-                case 'select':
-                  const opts = Array.isArray(fld.options) ? fld.options : [];
-                  inputHtml = `
-                    <select class="form-control" data-key="${key}" data-type="select" ${fld.is_required ? 'required' : ''}>
-                      <option value="">-- Choose Option --</option>
-                      ${opts.map(o => `<option value="${o}" ${String(currentVal).toLowerCase() === String(o).toLowerCase() ? 'selected' : ''}>${o}</option>`).join('')}
-                    </select>
-                  `;
-                  break;
-                case 'boolean':
-                  const isChecked = currentVal === true || currentVal === 'true' || currentVal === 1 || currentVal === 'yes';
-                  inputHtml = `
-                    <div class="mt-2">
-                      <label class="checkbox-label">
-                        <input type="checkbox" data-key="${key}" data-type="boolean" ${isChecked ? 'checked' : ''}>
-                        <span>Yes / Confirmed</span>
-                      </label>
-                    </div>
-                  `;
-                  break;
-                case 'date':
-                  inputHtml = `<input type="date" class="form-control" data-key="${key}" data-type="date" value="${currentVal}" ${fld.is_required ? 'required' : ''}>`;
-                  break;
-                case 'phone':
-                  inputHtml = `
-                    <div class="input-with-icon-preview">
-                      <input type="tel" class="form-control" data-key="${key}" data-type="phone" value="${currentVal}" placeholder="${fld.placeholder || '94470XXXXX'}" ${fld.is_required ? 'required' : ''}>
-                      <span class="icon-preview-box"><i class="fa-solid fa-phone"></i></span>
-                    </div>
-                  `;
-                  break;
-                case 'gps_coordinates':
-                  inputHtml = `
-                    <div class="input-with-icon-preview">
-                      <input type="text" class="form-control" data-key="${key}" data-type="gps_coordinates" value="${currentVal}" placeholder="${fld.placeholder || 'Latitude, Longitude'}" ${fld.is_required ? 'required' : ''}>
-                      <span class="icon-preview-box text-danger"><i class="fa-solid fa-location-dot"></i></span>
-                    </div>
-                  `;
-                  break;
-                case 'textarea':
-                  inputHtml = `<textarea class="form-control" rows="2" data-key="${key}" data-type="textarea" placeholder="${fld.placeholder || 'Remarks...'}" ${fld.is_required ? 'required' : ''}>${currentVal}</textarea>`;
-                  break;
-                case 'text':
-                default:
-                  inputHtml = `<input type="text" class="form-control" data-key="${key}" data-type="text" value="${currentVal}" placeholder="${fld.placeholder || ''}" ${fld.is_required ? 'required' : ''}>`;
-                  break;
-              }
-
-              return `
-                <div class="form-group ${gridCol}">
-                  <label class="font-bold text-sm">${fld.label} ${reqStar}</label>
-                  ${inputHtml}
-                  ${fld.help_text ? `<span class="text-xs text-muted mt-1 display-block">${fld.help_text}</span>` : ''}
-                </div>
-              `;
-            }).join('')}
-          </div>
+        <div id="edit-mod-panel-${mod.id}" class="edit-office-module-panel ${isVisible ? '' : 'hidden'}">
+          ${contentHtml}
         </div>
       `;
     }).join('');
@@ -2947,6 +3263,9 @@ class RTOApp {
         if (this.currentView === 'profile') {
           this.renderProfileView();
         }
+      }
+      if (this.currentView === 'admin' && this.adminStudioActiveTab === 'offices') {
+        this.renderAdminOfficesTable();
       }
 
       alert(`✓ Successfully updated "${updatedOffice ? updatedOffice.officeName : officeId}" in Supabase PostgreSQL!`);
