@@ -3062,7 +3062,11 @@ class ReportExporter {
    * Print an individual office profile
    */
   static printOfficeProfile() {
-    window.print();
+    if (window.RTO_APP && typeof window.RTO_APP.printProfileDossier === 'function') {
+      window.RTO_APP.printProfileDossier();
+    } else {
+      window.print();
+    }
   }
 }
 
@@ -3227,21 +3231,18 @@ class RTOApp {
     if (badge) {
       if (this.activeEngine === 'supabase') {
         badge.className = 'status-pill status-live';
-        badge.innerHTML = '<i class="fa-solid fa-bolt text-emerald-400"></i> Supabase Live DB (MVD DATA PORTAL)';
+        badge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Connected';
       } else {
         const mode = this.sheetService.config.mode;
-        if (mode === 'google_sheet') {
+        if (mode === 'google_sheet' || mode === 'apps_script') {
           badge.className = 'status-pill status-live';
-          badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Live Google Sheet';
-        } else if (mode === 'apps_script') {
-          badge.className = 'status-pill status-live';
-          badge.innerHTML = '<i class="fa-solid fa-cloud-bolt"></i> Google Apps Script API';
+          badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Connected';
         } else if (mode === 'file_upload') {
           badge.className = 'status-pill status-custom';
-          badge.innerHTML = `<i class="fa-solid fa-file-csv"></i> Local CSV (${meta.fileName || 'Uploaded'})`;
+          badge.innerHTML = `<i class="fa-solid fa-file-csv"></i> Local Dataset (${meta.fileName || 'Uploaded'})`;
         } else {
-          badge.className = 'status-pill status-demo';
-          badge.innerHTML = '<i class="fa-solid fa-database"></i> Sample Dataset (Kerala MVD)';
+          badge.className = 'status-pill status-live';
+          badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Connected';
         }
       }
     }
@@ -3686,7 +3687,7 @@ class RTOApp {
         <td>${d.totalVehicles} <span class="text-xs text-muted">(${d.vehiclesOver10Years} >10y)</span></td>
         <td class="font-semibold text-danger">${DataAdapter.formatCurrency(d.totalFinancialDues)}</td>
         <td>
-          <span class="status-pill ${d.statusClass}">${d.status} (${d.avgHealthScore})</span>
+          <span class="status-pill ${d.statusClass}">${d.status}${this.adminSession ? ` (${d.avgHealthScore})` : ''}</span>
         </td>
         <td>
           <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); window.RTO_APP.drilldownDistrict('${d.district}')">
@@ -3745,7 +3746,7 @@ class RTOApp {
             <span class="text-xs text-muted block">Pending Financial Dues</span>
             <span class="font-bold text-danger">${DataAdapter.formatCurrency(d.totalFinancialDues)}</span>
           </div>
-          <div class="text-right">
+          <div class="text-right admin-only-health ${this.adminSession ? '' : 'hidden'}">
             <span class="text-xs text-muted block">Avg Health Score</span>
             <span class="font-bold text-primary">${d.avgHealthScore} / 100</span>
           </div>
@@ -3823,7 +3824,7 @@ class RTOApp {
             ${this.tableState.sortField === col.key ? (this.tableState.sortAsc ? ' ▲' : ' ▼') : ''}
           </th>
         `).join('')}
-        <th>Health Score</th>
+        ${this.adminSession ? '<th>Health Score</th>' : ''}
         <th>Actions</th>
       </tr>
     `;
@@ -3868,11 +3869,13 @@ class RTOApp {
             if (val === false) val = '<span class="text-danger"><i class="fa-solid fa-xmark"></i> No</span>';
             return `<td>${val !== null && val !== undefined && val !== '' ? val : '—'}</td>`;
           }).join('')}
-          <td>
-            <button class="status-pill ${office.healthScore.statusClass}" onclick="event.stopPropagation(); window.RTO_APP.showHealthScoreModal('${office.id}')">
-              ${office.healthScore.score}/100 (${office.healthScore.rating})
-            </button>
-          </td>
+          ${this.adminSession ? `
+            <td>
+              <button class="status-pill ${office.healthScore.statusClass}" onclick="event.stopPropagation(); window.RTO_APP.showHealthScoreModal('${office.id}')">
+                ${office.healthScore.score}/100 (${office.healthScore.rating})
+              </button>
+            </td>
+          ` : ''}
           <td>
             <div class="table-actions-cell" onclick="event.stopPropagation()">
               <button class="btn btn-sm btn-primary" onclick="window.RTO_APP.openOfficeProfile('${office.id}')">
@@ -4705,13 +4708,40 @@ class RTOApp {
     this.setElText('report-timestamp', this.sheetService.lastUpdated || 'Current Session');
   }
 
+  printProfileDossier() {
+    if (!this.selectedOffice && this.allOffices.length > 0) {
+      this.selectedOffice = this.allOffices[0];
+    }
+    if (this.currentView !== 'profile') {
+      this.navigateTo('profile');
+    }
+    this.renderProfileView();
+
+    document.body.classList.add('printing-profile');
+
+    const cleanup = () => {
+      document.body.classList.remove('printing-profile');
+      window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
+
+    setTimeout(() => {
+      window.print();
+      setTimeout(cleanup, 2000);
+    }, 300);
+  }
+
   exportCurrentView(format) {
+    if (this.currentView === 'profile' && format === 'pdf') {
+      this.printProfileDossier();
+      return;
+    }
     if (format === 'excel') {
       ReportExporter.exportToExcel(this.filteredOffices, 'MVD_RTO_Inspection_Report');
     } else if (format === 'csv') {
       ReportExporter.exportToCsv(this.filteredOffices, 'MVD_RTO_Inspection_Report');
     } else if (format === 'pdf') {
-      ReportExporter.exportToPdf('view-reports', 'MVD_RTO_Inspection_Report');
+      ReportExporter.exportToPdf(this.currentView === 'reports' ? 'view-reports' : 'view-profile', `${this.selectedOffice ? this.selectedOffice.officeName.replace(/[^a-zA-Z0-9]/g, '_') : 'MVD'}_Profile_Dossier`);
     }
   }
 
@@ -4719,6 +4749,10 @@ class RTOApp {
   // MODALS: HEALTH SCORE & FINANCIALS & CONFIG
   // ==========================================
   showHealthScoreModal(officeId) {
+    if (!this.adminSession) {
+      this.openAdminLoginModal();
+      return;
+    }
     const o = this.allOffices.find(off => off.id === officeId);
     if (!o) return;
 
@@ -5076,6 +5110,7 @@ class RTOApp {
     const profEditBtn = document.getElementById('prof-edit-btn');
     const profDeleteBtn = document.getElementById('prof-delete-btn');
     const addOfficeBtn = document.getElementById('btn-admin-add-office');
+    const healthElements = document.querySelectorAll('.admin-only-health');
 
     if (this.adminSession) {
       if (banner) banner.classList.remove('hidden');
@@ -5087,6 +5122,7 @@ class RTOApp {
       if (profEditBtn) profEditBtn.classList.remove('hidden');
       if (profDeleteBtn) profDeleteBtn.classList.remove('hidden');
       if (addOfficeBtn) addOfficeBtn.classList.remove('hidden');
+      healthElements.forEach(el => el.classList.remove('hidden'));
     } else {
       if (banner) banner.classList.add('hidden');
       if (loginBtn) loginBtn.classList.remove('hidden');
@@ -5095,6 +5131,7 @@ class RTOApp {
       if (profEditBtn) profEditBtn.classList.add('hidden');
       if (profDeleteBtn) profDeleteBtn.classList.add('hidden');
       if (addOfficeBtn) addOfficeBtn.classList.add('hidden');
+      healthElements.forEach(el => el.classList.add('hidden'));
     }
   }
 
@@ -6091,7 +6128,7 @@ class RTOApp {
     const hiddenIdEl = document.getElementById('edit-office-id');
 
     if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-pen-to-square text-warning"></i> Edit: ${office.officeName}`;
-    if (subtitleEl) subtitleEl.textContent = `District: ${office.district} • Direct PostgreSQL write to Supabase table public.rto_offices`;
+    if (subtitleEl) subtitleEl.textContent = `District: ${office.district} • Official MVD Administrative Record`;
     if (hiddenIdEl) hiddenIdEl.value = office.id;
 
     if (!this.editOfficeActiveModuleId || !this.modules.some(m => m.id === this.editOfficeActiveModuleId)) {
@@ -6245,7 +6282,28 @@ class RTOApp {
                       break;
                     case 'text':
                     default:
-                      inputHtml = `<input type="text" class="form-control" data-key="${key}" data-type="text" value="${currentVal}" placeholder="${fld.placeholder || ''}" ${fld.is_required ? 'required' : ''}>`;
+                      if (key === 'office_name') {
+                        const officeNames = Array.from(new Set(
+                          this.allOffices.map(o => o.officeName || o.office_name).filter(Boolean)
+                        )).sort((a, b) => a.localeCompare(b));
+
+                        if (currentVal && !officeNames.includes(currentVal)) {
+                          officeNames.unshift(currentVal);
+                        }
+
+                        inputHtml = `
+                          <select class="form-control" data-key="${key}" data-type="text" ${fld.is_required ? 'required' : ''}>
+                            <option value="">-- Select MVD Office Name --</option>
+                            ${officeNames.map(name => `
+                              <option value="${name.replace(/"/g, '&quot;')}" ${String(currentVal).trim().toLowerCase() === String(name).trim().toLowerCase() ? 'selected' : ''}>
+                                ${name}
+                              </option>
+                            `).join('')}
+                          </select>
+                        `;
+                      } else {
+                        inputHtml = `<input type="text" class="form-control" data-key="${key}" data-type="text" value="${currentVal}" placeholder="${fld.placeholder || ''}" ${fld.is_required ? 'required' : ''}>`;
+                      }
                       break;
                   }
 
@@ -6343,15 +6401,15 @@ class RTOApp {
         this.renderAdminOfficesTable();
       }
 
-      alert(`✓ Successfully updated "${updatedOffice ? updatedOffice.officeName : officeId}" in Supabase PostgreSQL!`);
+      alert(`✓ Successfully updated "${updatedOffice ? updatedOffice.officeName : officeId}" in the database!`);
 
     } catch (err) {
       console.error('Failed to update office:', err);
-      alert(`Error updating office in Supabase: ${err.message}`);
+      alert(`Error updating office: ${err.message}`);
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save &amp; Update in Supabase';
+        submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save &amp; Update Record';
       }
     }
   }

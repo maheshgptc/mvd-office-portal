@@ -146,7 +146,11 @@ class ReportExporter {
    * Print an individual office profile
    */
   static printOfficeProfile() {
-    window.print();
+    if (window.RTO_APP && typeof window.RTO_APP.printProfileDossier === 'function') {
+      window.RTO_APP.printProfileDossier();
+    } else {
+      window.print();
+    }
   }
 }
 

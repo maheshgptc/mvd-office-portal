@@ -71,7 +71,7 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--slate-100);
+  background-color: var(--slate-50);
   color: var(--slate-800);
   min-height: 100vh;
   line-height: 1.5;
@@ -1567,6 +1567,7 @@ body {
 .form-control:focus {
   outline: none;
   border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .form-help {
@@ -2932,12 +2933,59 @@ body.sidebar-collapsed .sidebar-backdrop {
 }
 
 /* ==========================================================================
-   PRINT MEDIA STYLESHEET
+   OFFICIAL PORTAL FOOTER
+   ========================================================================== */
+.app-portal-footer {
+  margin-top: 40px;
+  padding: 20px 24px;
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.footer-dept-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--navy-900);
+  letter-spacing: 0.01em;
+}
+
+.footer-tagline {
+  font-size: 0.75rem;
+  color: var(--slate-500);
+}
+
+.footer-right {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--slate-600);
+}
+
+/* ==========================================================================
+   PRINT MEDIA STYLESHEET - OFFICIAL MVD DOSSIER PRINTING ENGINE
    ========================================================================== */
 @media print {
+  /* Hide non-printable interface elements */
   .app-header,
   .app-sidebar,
   .app-sub-bar,
+  .sidebar-footer,
+  .mobile-bottom-nav,
   .filter-panel,
   .profile-action-buttons,
   .btn,
@@ -2945,28 +2993,106 @@ body.sidebar-collapsed .sidebar-backdrop {
   .table-group-tabs-container,
   .table-pagination-footer,
   .modal-overlay,
-  .connection-error-overlay {
+  .connection-error-overlay,
+  .admin-active-bar,
+  .app-portal-footer {
     display: none !important;
   }
 
-  body {
+  /* Reset layout constraints and overflow */
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
     background: #ffffff !important;
-    color: #000000 !important;
-  }
-
-  .app-shell {
-    display: block;
-  }
-
-  .app-main {
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
     padding: 0 !important;
   }
 
-  .dossier-card,
-  .table-card,
+  .app-shell {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .app-main {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 10mm !important;
+  }
+
+  /* Hide other views when printing */
+  .app-view:not(#view-profile) {
+    display: none !important;
+  }
+
+  /* Explicitly make Profile Dossier visible */
+  #view-profile,
+  body.printing-profile #view-profile {
+    display: block !important;
+    visibility: visible !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   .profile-header-banner {
-    border: 1px solid #000000 !important;
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-left: 6px solid #1e40af !important;
     box-shadow: none !important;
+    padding: 16px 20px !important;
+    margin-bottom: 20px !important;
+    page-break-inside: avoid;
     break-inside: avoid;
+  }
+
+  .profile-details-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .dossier-card {
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 16px !important;
+    padding: 16px !important;
+  }
+
+  .dossier-card-header {
+    border-bottom: 1px solid #e2e8f0 !important;
+    margin-bottom: 12px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .table-card {
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Ensure background colors and borders render in print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
