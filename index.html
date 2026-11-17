@@ -100,60 +100,16 @@
           <i class="fa-solid fa-chart-pie"></i>
           <span>Executive Dashboard</span>
         </a>
-        <a href="#districts" class="sidebar-nav-item" data-view="districts">
-          <i class="fa-solid fa-map-location-dot"></i>
-          <span>District Analysis</span>
-        </a>
-        <a href="#directory" class="sidebar-nav-item hidden" data-view="directory" style="display: none !important;">
-          <i class="fa-solid fa-building-flag"></i>
-          <span>Office Directory</span>
-        </a>
-        <a href="#profile" class="sidebar-nav-item hidden" data-view="profile" style="display: none !important;">
-          <i class="fa-solid fa-id-badge"></i>
-          <span>Office Profile</span>
-        </a>
-        <a href="#manpower" class="sidebar-nav-item" data-view="manpower">
-          <i class="fa-solid fa-users-gear"></i>
-          <span>Manpower Strength</span>
-        </a>
-        <a href="#testgrounds" class="sidebar-nav-item" data-view="testgrounds">
-          <i class="fa-solid fa-road-barrier"></i>
-          <span>DL & CF Test Grounds</span>
-        </a>
-        <a href="#map" class="sidebar-nav-item" data-view="map">
-          <i class="fa-solid fa-earth-asia"></i>
-          <span>Test Ground GIS Map</span>
-        </a>
-        <a href="#vehicles" class="sidebar-nav-item" data-view="vehicles">
-          <i class="fa-solid fa-car-side"></i>
-          <span>Vehicle Fleet & Age</span>
-        </a>
-        <a href="#finances" class="sidebar-nav-item" data-view="finances">
-          <i class="fa-solid fa-file-invoice-dollar"></i>
-          <span>Financial Dues & Bills</span>
-        </a>
-        <a href="#itinventory" class="sidebar-nav-item" data-view="itinventory">
-          <i class="fa-solid fa-server"></i>
-          <span>IT Inventory & Assets</span>
-        </a>
-        <a href="#pendency" class="sidebar-nav-item" data-view="pendency">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-          <span>Critical Pendency & Remarks</span>
-        </a>
-        <a href="#comparison" class="sidebar-nav-item" data-view="comparison">
-          <i class="fa-solid fa-code-compare"></i>
-          <span>Office Comparison <span class="badge badge-accent" id="compare-badge-count">0</span></span>
-        </a>
-        <a href="#reports" class="sidebar-nav-item" data-view="reports">
-          <i class="fa-solid fa-file-arrow-down"></i>
-          <span>Reports & Dossier Export</span>
+        <a href="#survey" class="sidebar-nav-item" data-view="survey">
+          <i class="fa-solid fa-file-pen"></i>
+          <span>Office Survey Entry</span>
         </a>
 
-        <!-- Admin Studio Navigation Divider & Link -->
-        <div class="sidebar-section-divider">ADMINISTRATION</div>
+        <!-- Admin Studio Navigation Divider & Protected Link -->
+        <div class="sidebar-section-divider">ADMINISTRATION &amp; OPERATIONS</div>
         <a href="#admin" class="sidebar-nav-item sidebar-admin-item" data-view="admin" id="nav-item-admin">
-          <i class="fa-solid fa-sliders"></i>
-          <span>Admin Studio (CMS)</span>
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Admin Studio</span>
           <span class="badge badge-warning" id="admin-lock-badge"><i class="fa-solid fa-lock"></i></span>
         </a>
       </nav>
@@ -431,7 +387,797 @@
       <!-- ======================================================== -->
       <!-- VIEW 2: DISTRICT ANALYSIS                                -->
       <!-- ======================================================== -->
-      <section id="view-districts" class="app-view hidden">
+      
+      
+      <!-- ================================================================= -->
+      <!-- VIEW: PUBLIC OFFICE DATA ENTRY & SURVEY SUBMISSION FORM          -->
+      <!-- Based on all 69 Non-Metadata Supabase Columns                     -->
+      <!-- ================================================================= -->
+      <section id="view-survey" class="app-view hidden">
+        <div class="survey-portal-container">
+          
+          <!-- Survey Portal Header -->
+          <div class="survey-portal-header">
+            <div class="survey-header-badge">
+              <i class="fa-solid fa-building-flag"></i> MOTOR VEHICLES DEPARTMENT • KERALA
+            </div>
+            <h1 class="survey-portal-title">Official Office Data Entry Portal</h1>
+            <p class="survey-portal-subtitle">
+              Comprehensive survey submission covering infrastructure, cadre strength, testing grounds, department fleet, and financial liabilities. Directly synchronized with Supabase Live DB.
+            </p>
+            <div class="survey-header-meta">
+              <span class="meta-tag"><i class="fa-solid fa-shield-halved text-gold"></i> Official MVD Portal</span>
+              <span class="meta-tag"><i class="fa-solid fa-cloud-arrow-up text-emerald"></i> Live Supabase Realtime</span>
+              <span class="meta-tag"><i class="fa-solid fa-list-check"></i> 69 Survey Data Points</span>
+            </div>
+          </div>
+
+          <!-- Quick Pre-fill Selector Bar -->
+          <div class="survey-prefill-card">
+            <div class="survey-prefill-label">
+              <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+              <div>
+                <strong>Load Existing Office Data (Optional)</strong>
+                <span class="display-block text-xs text-muted">Select an office to load current database values for review &amp; updating, or leave blank to register fresh data.</span>
+              </div>
+            </div>
+            <div class="survey-prefill-control">
+              <select id="survey-prefill-select" class="form-control" onchange="window.RTO_APP.handleSurveyPrefill(this.value)">
+                <option value="">-- Start Fresh Form (Blank) --</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Step Navigation Tabs -->
+          <div class="survey-steps-bar" id="survey-steps-bar">
+            <button type="button" class="survey-step-btn active" data-step="1" onclick="window.RTO_APP.switchSurveyStep(1)">
+              <span class="step-num">1</span>
+              <span class="step-text"><i class="fa-solid fa-building"></i> Office &amp; Premises</span>
+            </button>
+            <button type="button" class="survey-step-btn" data-step="2" onclick="window.RTO_APP.switchSurveyStep(2)">
+              <span class="step-num">2</span>
+              <span class="step-text"><i class="fa-solid fa-user-tie"></i> Key Officers</span>
+            </button>
+            <button type="button" class="survey-step-btn" data-step="3" onclick="window.RTO_APP.switchSurveyStep(3)">
+              <span class="step-num">3</span>
+              <span class="step-text"><i class="fa-solid fa-users-gear"></i> Staff &amp; Cadres</span>
+            </button>
+            <button type="button" class="survey-step-btn" data-step="4" onclick="window.RTO_APP.switchSurveyStep(4)">
+              <span class="step-num">4</span>
+              <span class="step-text"><i class="fa-solid fa-road-barrier"></i> Test Grounds</span>
+            </button>
+            <button type="button" class="survey-step-btn" data-step="5" onclick="window.RTO_APP.switchSurveyStep(5)">
+              <span class="step-num">5</span>
+              <span class="step-text"><i class="fa-solid fa-car-side"></i> Vehicle Fleet</span>
+            </button>
+            <button type="button" class="survey-step-btn" data-step="6" onclick="window.RTO_APP.switchSurveyStep(6)">
+              <span class="step-num">6</span>
+              <span class="step-text"><i class="fa-solid fa-file-invoice-dollar"></i> Liabilities &amp; Dues</span>
+            </button>
+          </div>
+
+          <!-- The Entry Form Form -->
+          <form id="public-survey-form" onsubmit="window.RTO_APP.handlePublicSurveySubmit(event)">
+            <input type="hidden" id="survey-office-id" value="">
+
+            <!-- STEP 1: Basic Office Details & Geolocation (8 fields) -->
+            <div class="survey-step-panel" id="survey-step-1">
+              <div class="survey-card-header">
+                <div class="survey-card-title">
+                  <i class="fa-solid fa-building text-primary"></i>
+                  <div>
+                    <h3>Step 1: Primary Office Information &amp; Premises</h3>
+                    <span>Official identification, administrative district, functioning era, and geolocation coordinates</span>
+                  </div>
+                </div>
+                <span class="badge badge-subtle">8 Fields</span>
+              </div>
+              
+              <div class="form-dynamic-grid p-4">
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">District <span class="text-danger">*</span></label>
+                  <select id="survey-district" class="form-control" data-key="district" required>
+                    <option value="">-- Select District (14 Kerala Districts) --</option>
+                    <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                    <option value="Kollam">Kollam</option>
+                    <option value="Pathanamthitta">Pathanamthitta</option>
+                    <option value="Alappuzha">Alappuzha</option>
+                    <option value="Kottayam">Kottayam</option>
+                    <option value="Idukki">Idukki</option>
+                    <option value="Ernakulam">Ernakulam</option>
+                    <option value="Thrissur">Thrissur</option>
+                    <option value="Palakkad">Palakkad</option>
+                    <option value="Malappuram">Malappuram</option>
+                    <option value="Kozhikode">Kozhikode</option>
+                    <option value="Wayanad">Wayanad</option>
+                    <option value="Kannur">Kannur</option>
+                    <option value="Kasaragod">Kasaragod</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">Office Name <span class="text-danger">*</span></label>
+                  <input type="text" id="survey-office_name" class="form-control" data-key="office_name" placeholder="e.g. Regional Transport Office Thiruvananthapuram" required>
+                  <span class="text-xs text-muted mt-1 display-block">Official name of the RT Office or Sub-RT Office</span>
+                </div>
+
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm">Year of Functioning (Est.)</label>
+                  <input type="text" id="survey-year_of_functioning" class="form-control" data-key="year_of_functioning" placeholder="e.g. 1985">
+                </div>
+
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm">Building Type</label>
+                  <select id="survey-building_type" class="form-control" data-key="building_type">
+                    <option value="Government Building">Government Building</option>
+                    <option value="Rented Building">Rented Building</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm">Total Office Area (Sq Ft)</label>
+                  <input type="number" id="survey-total_office_area" class="form-control" data-key="total_office_area" placeholder="e.g. 4500" min="0">
+                </div>
+
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">Office GPS Location / Google Maps Link</label>
+                  <div class="input-with-icon-preview">
+                    <input type="text" id="survey-office_gps_raw" class="form-control" data-key="office_gps_raw" placeholder="e.g. 8.5061, 76.9558 or Google Maps share link" onblur="window.RTO_APP.handleGpsAutoFill(this, 'survey-office_latitude', 'survey-office_longitude')">
+                    <span class="icon-preview-box text-danger"><i class="fa-solid fa-location-dot"></i></span>
+                  </div>
+                  <span class="text-xs text-muted mt-1 display-block">Paste Maps pin or lat,lng; coordinates will auto-extract</span>
+                </div>
+
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Office Latitude</label>
+                  <input type="number" step="any" id="survey-office_latitude" class="form-control" data-key="office_latitude" placeholder="8.5061">
+                </div>
+
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Office Longitude</label>
+                  <input type="number" step="any" id="survey-office_longitude" class="form-control" data-key="office_longitude" placeholder="76.9558">
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 2: Key Officers & Contact Roster (9 fields) -->
+            <div class="survey-step-panel hidden" id="survey-step-2">
+              <div class="survey-card-header">
+                <div class="survey-card-title">
+                  <i class="fa-solid fa-user-tie text-gold"></i>
+                  <div>
+                    <h3>Step 2: Key Administrative Officers &amp; Roster</h3>
+                    <span>Deputy Transport Commissioner, RTO, Joint RTO contacts, and in-position deployment status</span>
+                  </div>
+                </div>
+                <span class="badge badge-subtle">9 Fields</span>
+              </div>
+
+              <div class="form-dynamic-grid p-4">
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">Deputy Transport Commissioner (DTC) Name</label>
+                  <input type="text" id="survey-dtc_name" class="form-control" data-key="dtc_name" placeholder="Officer Name">
+                </div>
+
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">DTC Mobile Number</label>
+                  <div class="input-with-icon-preview">
+                    <input type="tel" id="survey-dtc_mobile" class="form-control" data-key="dtc_mobile" placeholder="94470XXXXX">
+                    <span class="icon-preview-box"><i class="fa-solid fa-phone"></i></span>
+                  </div>
+                </div>
+
+                <div class="form-group col-5">
+                  <label class="font-bold text-sm">RTO / Incharge Officer Name</label>
+                  <input type="text" id="survey-rto_name" class="form-control" data-key="rto_name" placeholder="Officer Name">
+                </div>
+
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm">RTO Mobile Number</label>
+                  <div class="input-with-icon-preview">
+                    <input type="tel" id="survey-rto_mobile" class="form-control" data-key="rto_mobile" placeholder="94470XXXXX">
+                    <span class="icon-preview-box"><i class="fa-solid fa-phone"></i></span>
+                  </div>
+                </div>
+
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">RTO In-Position</label>
+                  <div class="mt-2">
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                      <input type="checkbox" id="survey-rto_available" data-key="rto_available" data-type="boolean" checked style="width:18px;height:18px;">
+                      <span class="text-sm font-semibold">Currently In Position</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group col-5">
+                  <label class="font-bold text-sm">Joint RTO Name</label>
+                  <input type="text" id="survey-jrto_name" class="form-control" data-key="jrto_name" placeholder="Officer Name">
+                </div>
+
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm">Joint RTO Mobile Number</label>
+                  <div class="input-with-icon-preview">
+                    <input type="tel" id="survey-jrto_mobile" class="form-control" data-key="jrto_mobile" placeholder="94470XXXXX">
+                    <span class="icon-preview-box"><i class="fa-solid fa-phone"></i></span>
+                  </div>
+                </div>
+
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Joint RTO In-Position</label>
+                  <div class="mt-2">
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                      <input type="checkbox" id="survey-jrto_available" data-key="jrto_available" data-type="boolean" checked style="width:18px;height:18px;">
+                      <span class="text-sm font-semibold">Currently In Position</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group col-12">
+                  <label class="font-bold text-sm">Office Landline / Public Relations (PRO) Phone</label>
+                  <input type="text" id="survey-landline_pro" class="form-control" data-key="landline_pro" placeholder="e.g. 0471-2333333 / Helpdesk">
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 3: Staff Strength & Cadres (18 fields) -->
+            <div class="survey-step-panel hidden" id="survey-step-3">
+              <div class="survey-card-header">
+                <div class="survey-card-title">
+                  <i class="fa-solid fa-users-gear text-emerald"></i>
+                  <div>
+                    <h3>Step 3: Cadre-Wise Staff Strength (Sanctioned vs Available)</h3>
+                    <span>Motor vehicle inspectors, ministerial staff, superintendents, clerks, drivers, and support cadres</span>
+                  </div>
+                </div>
+                <span class="badge badge-subtle">18 Fields</span>
+              </div>
+
+              <div class="form-dynamic-grid p-4">
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">MVI Sanctioned</label>
+                  <input type="number" id="survey-mvi_sanctioned" class="form-control" data-key="mvi_sanctioned" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">MVI Available</label>
+                  <input type="number" id="survey-mvi_available" class="form-control" data-key="mvi_available" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">AMVI Sanctioned</label>
+                  <input type="number" id="survey-amvi_sanctioned" class="form-control" data-key="amvi_sanctioned" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">AMVI Available</label>
+                  <input type="number" id="survey-amvi_available" class="form-control" data-key="amvi_available" data-type="number" placeholder="0" min="0">
+                </div>
+
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Senior Supt (SS) Sanctioned</label>
+                  <input type="number" id="survey-ss_sanctioned" class="form-control" data-key="ss_sanctioned" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">SS Available</label>
+                  <input type="number" id="survey-ss_available" class="form-control" data-key="ss_available" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Junior Supt (JS) Sanctioned</label>
+                  <input type="number" id="survey-js_sanctioned" class="form-control" data-key="js_sanctioned" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">JS Available</label>
+                  <input type="number" id="survey-js_available" class="form-control" data-key="js_available" data-type="number" placeholder="0" min="0">
+                </div>
+
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">HA / PRO Sanctioned</label>
+                  <input type="number" id="survey-ha_pro_sanctioned" class="form-control" data-key="ha_pro_sanctioned" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">HA / PRO Available</label>
+                  <input type="number" id="survey-ha_pro_available" class="form-control" data-key="ha_pro_available" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Clerks Sanctioned</label>
+                  <input type="number" id="survey-clerk_sanctioned" class="form-control" data-key="clerk_sanctioned" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Clerks Available</label>
+                  <input type="number" id="survey-clerk_available" class="form-control" data-key="clerk_available" data-type="number" placeholder="0" min="0">
+                </div>
+
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Driver Sanctioned</label>
+                  <input type="number" id="survey-driver_sanctioned" class="form-control" data-key="driver_sanctioned" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Driver Available</label>
+                  <input type="number" id="survey-driver_available" class="form-control" data-key="driver_available" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">OA Sanctioned</label>
+                  <input type="number" id="survey-oa_sanctioned" class="form-control" data-key="oa_sanctioned" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">OA Available</label>
+                  <input type="number" id="survey-oa_available" class="form-control" data-key="oa_available" data-type="number" placeholder="0" min="0">
+                </div>
+
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">PTS Available (Sweeper)</label>
+                  <input type="number" id="survey-pts_available" class="form-control" data-key="pts_available" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-9">
+                  <label class="font-bold text-sm">Other Staff / Contract Staff Details</label>
+                  <textarea id="survey-other_staff_details" class="form-control" data-key="other_staff_details" rows="2" placeholder="Any additional temporary, security, contract, or deputation staff..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 4: Test Grounds & Testing Infrastructure (16 fields) -->
+            <div class="survey-step-panel hidden" id="survey-step-4">
+              <div class="survey-card-header">
+                <div class="survey-card-title">
+                  <i class="fa-solid fa-road-barrier text-primary"></i>
+                  <div>
+                    <h3>Step 4: DL &amp; CF Test Grounds &amp; Track Coordinates</h3>
+                    <span>Ground ownership status, testing schedules, ground counts, and geolocation tracks</span>
+                  </div>
+                </div>
+                <span class="badge badge-subtle">16 Fields</span>
+              </div>
+
+              <div class="form-dynamic-grid p-4">
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm">Own Dedicated Ground?</label>
+                  <div class="mt-2">
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                      <input type="checkbox" id="survey-has_own_ground" data-key="has_own_ground" data-type="boolean" style="width:18px;height:18px;">
+                      <span class="text-sm font-semibold">Office owns ground facility</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm">DL Test Days</label>
+                  <input type="text" id="survey-dl_days" class="form-control" data-key="dl_days" placeholder="e.g. Mon, Wed, Fri">
+                </div>
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm">CF Test Days</label>
+                  <input type="text" id="survey-cf_days" class="form-control" data-key="cf_days" placeholder="e.g. Tue, Thu, Sat">
+                </div>
+
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">DL Test Grounds Count</label>
+                  <input type="number" id="survey-dl_grounds_count" class="form-control" data-key="dl_grounds_count" data-type="number" placeholder="1" min="0">
+                </div>
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">CF Test Grounds Count</label>
+                  <input type="number" id="survey-cf_grounds_count" class="form-control" data-key="cf_grounds_count" data-type="number" placeholder="1" min="0">
+                </div>
+
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">DL Ground 1 GPS Coordinates / Maps Link</label>
+                  <input type="text" id="survey-dl_gps_1_raw" class="form-control" data-key="dl_gps_1_raw" placeholder="e.g. 8.5201, 76.9402" onblur="window.RTO_APP.handleGpsAutoFill(this, 'survey-dl_gps_1_lat', 'survey-dl_gps_1_lng')">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">DL Ground 1 Latitude</label>
+                  <input type="number" step="any" id="survey-dl_gps_1_lat" class="form-control" data-key="dl_gps_1_lat" placeholder="8.5201">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">DL Ground 1 Longitude</label>
+                  <input type="number" step="any" id="survey-dl_gps_1_lng" class="form-control" data-key="dl_gps_1_lng" placeholder="76.9402">
+                </div>
+
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">DL Ground 2 GPS Coordinates</label>
+                  <input type="text" id="survey-dl_gps_2_raw" class="form-control" data-key="dl_gps_2_raw" placeholder="Alternate DL ground coordinates...">
+                </div>
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">DL Ground 3 GPS Coordinates</label>
+                  <input type="text" id="survey-dl_gps_3_raw" class="form-control" data-key="dl_gps_3_raw" placeholder="Tertiary DL ground coordinates...">
+                </div>
+
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">CF Ground 1 GPS Coordinates / Maps Link</label>
+                  <input type="text" id="survey-cf_gps_1_raw" class="form-control" data-key="cf_gps_1_raw" placeholder="e.g. 8.5301, 76.9350" onblur="window.RTO_APP.handleGpsAutoFill(this, 'survey-cf_gps_1_lat', 'survey-cf_gps_1_lng')">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">CF Ground 1 Latitude</label>
+                  <input type="number" step="any" id="survey-cf_gps_1_lat" class="form-control" data-key="cf_gps_1_lat" placeholder="8.5301">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">CF Ground 1 Longitude</label>
+                  <input type="number" step="any" id="survey-cf_gps_1_lng" class="form-control" data-key="cf_gps_1_lng" placeholder="76.9350">
+                </div>
+
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">CF Ground 2 GPS Coordinates</label>
+                  <input type="text" id="survey-cf_gps_2_raw" class="form-control" data-key="cf_gps_2_raw" placeholder="Alternate CF ground coordinates...">
+                </div>
+                <div class="form-group col-6">
+                  <label class="font-bold text-sm">CF Ground 3 GPS Coordinates</label>
+                  <input type="text" id="survey-cf_gps_3_raw" class="form-control" data-key="cf_gps_3_raw" placeholder="Tertiary CF ground coordinates...">
+                </div>
+
+                <div class="form-group col-12">
+                  <label class="font-bold text-sm">CF Other Testing Locations &amp; Ground Lease Details</label>
+                  <textarea id="survey-cf_other_location_details" class="form-control" data-key="cf_other_location_details" rows="2" placeholder="Details of leased grounds, local panchayat permissions, or facilities..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 5: Vehicle Fleet Management (4 fields) -->
+            <div class="survey-step-panel hidden" id="survey-step-5">
+              <div class="survey-card-header">
+                <div class="survey-card-title">
+                  <i class="fa-solid fa-car-side text-primary"></i>
+                  <div>
+                    <h3>Step 5: Vehicle Fleet &amp; Aged Vehicle Compliance</h3>
+                    <span>Fuel mix of operational departmental vehicles and aged vehicles (>10 years) monitoring</span>
+                  </div>
+                </div>
+                <span class="badge badge-subtle">4 Fields</span>
+              </div>
+
+              <div class="form-dynamic-grid p-4">
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm"><i class="fa-solid fa-gas-pump text-muted"></i> Diesel Vehicles</label>
+                  <input type="number" id="survey-vehicles_diesel" class="form-control" data-key="vehicles_diesel" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm"><i class="fa-solid fa-fire text-muted"></i> Petrol Vehicles</label>
+                  <input type="number" id="survey-vehicles_petrol" class="form-control" data-key="vehicles_petrol" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm"><i class="fa-solid fa-bolt text-success"></i> Electric Vehicles (EV)</label>
+                  <input type="number" id="survey-vehicles_electric" class="form-control" data-key="vehicles_electric" data-type="number" placeholder="0" min="0">
+                </div>
+                <div class="form-group col-12">
+                  <label class="font-bold text-sm text-warning"><i class="fa-solid fa-triangle-exclamation"></i> Departmental Vehicles Over 10 Years Old in Active Duty</label>
+                  <input type="number" id="survey-vehicles_over_10_years" class="form-control" data-key="vehicles_over_10_years" data-type="number" placeholder="0" min="0">
+                  <span class="text-xs text-muted mt-1 display-block">Vehicles requiring green protocol condemnation or phased replacement</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 6: Financial Liabilities & Dues (14 fields) -->
+            <div class="survey-step-panel hidden" id="survey-step-6">
+              <div class="survey-card-header">
+                <div class="survey-card-title">
+                  <i class="fa-solid fa-file-invoice-dollar text-danger"></i>
+                  <div>
+                    <h3>Step 6: Financial Liabilities, Arrears &amp; Pending Bills</h3>
+                    <span>Outstanding office rent, vehicle repair liabilities, fuel credit dues, and contingent expenses</span>
+                  </div>
+                </div>
+                <span class="badge badge-subtle">14 Fields</span>
+              </div>
+
+              <div class="form-dynamic-grid p-4">
+                <!-- Rent Dues -->
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Rent Arrears (₹)</label>
+                  <div class="input-with-icon-preview" style="position:relative;">
+                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-weight:700;color:#64748b;">₹</span>
+                    <input type="number" step="any" id="survey-rent_dues_amount" class="form-control" style="padding-left:30px;" data-key="rent_dues_amount" data-type="currency" placeholder="0.00" min="0">
+                  </div>
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Rent Due From Period</label>
+                  <input type="text" id="survey-rent_due_from" class="form-control" data-key="rent_due_from" placeholder="e.g. April 2023">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Rent Bill Submitted On</label>
+                  <input type="text" id="survey-rent_submitted_on" class="form-control" data-key="rent_submitted_on" placeholder="e.g. 15/01/2024">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Rent Remarks</label>
+                  <input type="text" id="survey-rent_remarks" class="form-control" data-key="rent_remarks" placeholder="Landlord notes...">
+                </div>
+
+                <!-- Repair Dues -->
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Repair Arrears (₹)</label>
+                  <div class="input-with-icon-preview" style="position:relative;">
+                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-weight:700;color:#64748b;">₹</span>
+                    <input type="number" step="any" id="survey-repair_dues_amount" class="form-control" style="padding-left:30px;" data-key="repair_dues_amount" data-type="currency" placeholder="0.00" min="0">
+                  </div>
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Repair Due From Period</label>
+                  <input type="text" id="survey-repair_due_from" class="form-control" data-key="repair_due_from" placeholder="e.g. Oct 2023">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Repair Bill Submitted On</label>
+                  <input type="text" id="survey-repair_submitted_on" class="form-control" data-key="repair_submitted_on" placeholder="e.g. 20/02/2024">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Repair Remarks</label>
+                  <input type="text" id="survey-repair_remarks" class="form-control" data-key="repair_remarks" placeholder="Workshop details...">
+                </div>
+
+                <!-- Fuel Dues -->
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Fuel Arrears (₹)</label>
+                  <div class="input-with-icon-preview" style="position:relative;">
+                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-weight:700;color:#64748b;">₹</span>
+                    <input type="number" step="any" id="survey-fuel_dues_amount" class="form-control" style="padding-left:30px;" data-key="fuel_dues_amount" data-type="currency" placeholder="0.00" min="0">
+                  </div>
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Fuel Due From Period</label>
+                  <input type="text" id="survey-fuel_due_from" class="form-control" data-key="fuel_due_from" placeholder="e.g. Nov 2023">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Fuel Bill Submitted On</label>
+                  <input type="text" id="survey-fuel_submitted_on" class="form-control" data-key="fuel_submitted_on" placeholder="e.g. 10/03/2024">
+                </div>
+                <div class="form-group col-3">
+                  <label class="font-bold text-sm">Fuel Remarks</label>
+                  <input type="text" id="survey-fuel_remarks" class="form-control" data-key="fuel_remarks" placeholder="Pump / oil company notes...">
+                </div>
+
+                <!-- Other Expenses -->
+                <div class="form-group col-4">
+                  <label class="font-bold text-sm">Other Contingency Expenses (₹)</label>
+                  <div class="input-with-icon-preview" style="position:relative;">
+                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-weight:700;color:#64748b;">₹</span>
+                    <input type="number" step="any" id="survey-other_expenses_amount" class="form-control" style="padding-left:30px;" data-key="other_expenses_amount" data-type="currency" placeholder="0.00" min="0">
+                  </div>
+                </div>
+                <div class="form-group col-8">
+                  <label class="font-bold text-sm">Details of Other Expenses &amp; Liabilities</label>
+                  <textarea id="survey-other_expenses_details" class="form-control" data-key="other_expenses_details" rows="2" placeholder="Details regarding water, electricity, telephone, stationeries, security, or unsettled claims..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Survey Form Action Bar -->
+            <div class="survey-action-bar">
+              <button type="button" class="btn btn-outline" id="btn-survey-prev" onclick="window.RTO_APP.handleSurveyStepNav(-1)" style="display:none;">
+                <i class="fa-solid fa-arrow-left"></i> Previous Step
+              </button>
+              
+              <div class="ml-auto d-flex gap-2">
+                <button type="button" class="btn btn-outline" onclick="window.RTO_APP.resetPublicSurveyForm()">
+                  <i class="fa-solid fa-rotate-left"></i> Clear Form
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-survey-next" onclick="window.RTO_APP.handleSurveyStepNav(1)">
+                  Next Step <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-public-survey">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Submit Office Survey to Supabase
+                </button>
+              </div>
+            </div>
+
+          </form>
+
+        </div>
+      </section>
+
+      <section class="app-view hidden" id="view-admin">
+        <div class="view-header-row">
+          <div>
+            <h2 class="view-title"><i class="fa-solid fa-sliders text-warning"></i> Admin Studio</h2>
+            <p class="view-subtitle">Manage Regional Transport Offices, edit survey data, configure administrative Modules, and define granular form Fields.</p>
+          </div>
+          <div class="view-header-actions">
+            <button class="btn btn-outline btn-sm" onclick="window.RTO_APP.refreshData()">
+              <i class="fa-solid fa-rotate"></i> Refresh DB
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="window.RTO_APP.openAddOfficeModal()" id="btn-admin-add-office">
+              <i class="fa-solid fa-plus"></i> Add New Office
+            </button>
+          </div>
+        </div>
+
+        <!-- Studio Sub-Navigation Tabs (All Departmental Operations & CMS) -->
+        <div class="admin-mode-tabs-bar">
+          <button type="button" class="admin-mode-tab-btn active" id="tab-btn-admin-offices" data-tab="offices" onclick="window.RTO_APP.switchAdminStudioTab('offices')">
+            <i class="fa-solid fa-building-flag"></i> Office Management (<span id="admin-office-count-badge">100</span>)
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-districts" data-tab="districts" onclick="window.RTO_APP.switchAdminStudioTab('districts')">
+            <i class="fa-solid fa-map-location-dot"></i> District Analysis
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-directory" data-tab="directory" onclick="window.RTO_APP.switchAdminStudioTab('directory')">
+            <i class="fa-solid fa-table-list"></i> Office Directory
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-profile" data-tab="profile" onclick="window.RTO_APP.switchAdminStudioTab('profile')">
+            <i class="fa-solid fa-id-badge"></i> Office Profile
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-manpower" data-tab="manpower" onclick="window.RTO_APP.switchAdminStudioTab('manpower')">
+            <i class="fa-solid fa-users-gear"></i> Manpower Strength
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-testgrounds" data-tab="testgrounds" onclick="window.RTO_APP.switchAdminStudioTab('testgrounds')">
+            <i class="fa-solid fa-road-barrier"></i> DL &amp; CF Grounds
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-map" data-tab="map" onclick="window.RTO_APP.switchAdminStudioTab('map')">
+            <i class="fa-solid fa-earth-asia"></i> GIS Map
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-vehicles" data-tab="vehicles" onclick="window.RTO_APP.switchAdminStudioTab('vehicles')">
+            <i class="fa-solid fa-car-side"></i> Vehicle Fleet &amp; Age
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-finances" data-tab="finances" onclick="window.RTO_APP.switchAdminStudioTab('finances')">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Financial Dues &amp; Bills
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-itinventory" data-tab="itinventory" onclick="window.RTO_APP.switchAdminStudioTab('itinventory')">
+            <i class="fa-solid fa-server"></i> IT Assets
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-pendency" data-tab="pendency" onclick="window.RTO_APP.switchAdminStudioTab('pendency')">
+            <i class="fa-solid fa-triangle-exclamation"></i> Critical Pendency
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-comparison" data-tab="comparison" onclick="window.RTO_APP.switchAdminStudioTab('comparison')">
+            <i class="fa-solid fa-code-compare"></i> Comparison (<span id="compare-badge-count">0</span>)
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-reports" data-tab="reports" onclick="window.RTO_APP.switchAdminStudioTab('reports')">
+            <i class="fa-solid fa-file-arrow-down"></i> Reports &amp; Export
+          </button>
+          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-schema" data-tab="schema" onclick="window.RTO_APP.switchAdminStudioTab('schema')">
+            <i class="fa-solid fa-sliders"></i> Schema &amp; Hierarchy
+          </button>
+        </div>
+
+        <!-- TAB 1: Office Management Panel -->
+        <div id="admin-studio-offices-panel" class="admin-tab-panel">
+          <div class="admin-office-toolbar">
+            <div class="search-box flex-grow">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="admin-offices-search-input" class="form-control" placeholder="Search office name, district, or code..." oninput="window.RTO_APP.renderAdminOfficesTable()">
+            </div>
+            <div class="filter-select-group">
+              <select id="admin-offices-district-filter" class="form-control" onchange="window.RTO_APP.renderAdminOfficesTable()">
+                <option value="">All Districts (14)</option>
+              </select>
+            </div>
+            <div class="filter-select-group">
+              <select id="admin-offices-building-filter" class="form-control" onchange="window.RTO_APP.renderAdminOfficesTable()">
+                <option value="">All Building Types</option>
+                <option value="Government Building">Government Building</option>
+                <option value="Rented">Rented</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.RTO_APP.openAddOfficeModal()">
+              <i class="fa-solid fa-plus"></i> New Office
+            </button>
+          </div>
+
+          <div class="table-container mt-3">
+            <table class="data-table" id="admin-offices-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>Office Name</th>
+                  <th>District</th>
+                  <th>Building & Area</th>
+                  <th>RTO / JRTO Incharge</th>
+                  <th>Staff (San/Avail)</th>
+                  <th>Vehicles</th>
+                  <th>Rent & Liabilities</th>
+                  <th style="text-align: right; min-width: 170px;">Admin Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-offices-tbody">
+                <!-- Dynamically populated rows with Edit and Delete buttons -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: Schema & CMS Builder Panel -->
+        <div id="admin-studio-schema-panel" class="admin-tab-panel hidden">
+          <!-- Admin Studio KPI Stats Bar -->
+          <div class="admin-stats-bar">
+            <div class="admin-stat-chip">
+              <div class="chip-icon bg-blue-subtle text-primary"><i class="fa-solid fa-cubes"></i></div>
+              <div class="chip-details">
+                <span class="stat-number" id="stat-total-modules">5</span>
+                <span class="stat-label">Modules</span>
+              </div>
+            </div>
+            <div class="admin-stat-chip">
+              <div class="chip-icon bg-gold-subtle text-warning"><i class="fa-solid fa-list-check"></i></div>
+              <div class="chip-details">
+                <span class="stat-number" id="stat-total-menus">11</span>
+                <span class="stat-label">Sub-Menus</span>
+              </div>
+            </div>
+            <div class="admin-stat-chip">
+              <div class="chip-icon bg-emerald-subtle text-success"><i class="fa-solid fa-pen-ruler"></i></div>
+              <div class="chip-details">
+                <span class="stat-number" id="stat-total-fields">62</span>
+                <span class="stat-label">Dynamic Fields</span>
+              </div>
+            </div>
+            <div class="admin-stat-chip flex-grow">
+              <div class="chip-icon bg-purple-subtle text-purple"><i class="fa-solid fa-diagram-project"></i></div>
+              <div class="hierarchy-breadcrumb-box">
+                <span class="stat-label">ACTIVE DRILLDOWN:</span>
+                <span class="hierarchy-crumb" id="admin-crumb-trail">All Modules &gt; Select a Menu</span>
+              </div>
+            </div>
+          </div>
+
+        <!-- 3-Column Studio Hierarchy Workbench -->
+        <div class="admin-workbench-grid">
+          
+          <!-- Column 1: Modules Management -->
+          <div class="workbench-col" id="col-modules">
+            <div class="workbench-col-header">
+              <div class="col-title-group">
+                <i class="fa-solid fa-cubes text-primary"></i>
+                <div>
+                  <h4 class="col-title">1. Modules</h4>
+                  <span class="col-subtitle">Parent domains</span>
+                </div>
+              </div>
+              <button class="btn btn-xs btn-primary" onclick="window.RTO_APP.openModuleModal()" title="Add New Module">
+                <i class="fa-solid fa-plus"></i> Add Module
+              </button>
+            </div>
+            <div class="workbench-col-body" id="modules-list-container">
+              <!-- Dynamically populated module cards -->
+              <div class="loading-placeholder"><i class="fa-solid fa-spinner fa-spin"></i> Loading modules...</div>
+            </div>
+          </div>
+
+          <!-- Column 2: Menus Management -->
+          <div class="workbench-col" id="col-menus">
+            <div class="workbench-col-header">
+              <div class="col-title-group">
+                <i class="fa-solid fa-list-check text-warning"></i>
+                <div>
+                  <h4 class="col-title" id="menus-col-heading">2. Menus</h4>
+                  <span class="col-subtitle" id="menus-col-subheading">Select a module</span>
+                </div>
+              </div>
+              <button class="btn btn-xs btn-primary" id="btn-add-menu-action" onclick="window.RTO_APP.openMenuModal()" title="Add Menu under this Module">
+                <i class="fa-solid fa-plus"></i> Add Menu
+              </button>
+            </div>
+            <div class="workbench-col-body" id="menus-list-container">
+              <!-- Dynamically populated menu cards -->
+              <div class="empty-workbench-notice">
+                <i class="fa-solid fa-arrow-left"></i>
+                <p>Select a Module to view & manage its Menus</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3: Fields Management -->
+          <div class="workbench-col flex-2" id="col-fields">
+            <div class="workbench-col-header">
+              <div class="col-title-group">
+                <i class="fa-solid fa-pen-ruler text-success"></i>
+                <div>
+                  <h4 class="col-title" id="fields-col-heading">3. Fields</h4>
+                  <span class="col-subtitle" id="fields-col-subheading">Select a menu</span>
+                </div>
+              </div>
+              <div class="header-action-group">
+                <button class="btn btn-xs btn-outline" id="btn-preview-form-action" onclick="window.RTO_APP.previewCurrentMenuForm()" title="Live Form Interactive Preview">
+                  <i class="fa-solid fa-eye"></i> Preview Form
+                </button>
+                <button class="btn btn-xs btn-primary" id="btn-add-field-action" onclick="window.RTO_APP.openFieldModal()" title="Add Field under this Menu">
+                  <i class="fa-solid fa-plus"></i> Add Field
+                </button>
+              </div>
+            </div>
+            <div class="workbench-col-body" id="fields-list-container">
+              <!-- Dynamically populated field cards -->
+              <div class="empty-workbench-notice">
+                <i class="fa-solid fa-arrow-left"></i>
+                <p>Select a Menu to view, add, or customize its Fields</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        </div>
+      
+
+        <!-- Operational Views Embedded as Admin Panels -->
+<section id="view-districts" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>District-Level Monitoring & Performance Analysis</h2>
@@ -444,7 +1190,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 3: OFFICE DIRECTORY / DATA TABLE                    -->
       <!-- ======================================================== -->
-      <section id="view-directory" class="app-view hidden">
+      <section id="view-directory" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>Regional Transport Office Directory</h2>
@@ -477,7 +1223,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 4: DETAILED OFFICE PROFILE                          -->
       <!-- ======================================================== -->
-      <section id="view-profile" class="app-view hidden">
+      <section id="view-profile" class="admin-tab-panel hidden">
         <div class="profile-header-banner">
           <div class="profile-banner-left">
             <div class="profile-badge-row">
@@ -725,7 +1471,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 5: MANPOWER ANALYSIS                                -->
       <!-- ======================================================== -->
-      <section id="view-manpower" class="app-view hidden">
+      <section id="view-manpower" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>State-Wide Manpower & Cadre Shortage Analytics</h2>
@@ -820,7 +1566,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 6: TEST GROUNDS                                     -->
       <!-- ======================================================== -->
-      <section id="view-testgrounds" class="app-view hidden">
+      <section id="view-testgrounds" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>Driving License (DL) & Certificate of Fitness (CF) Test Grounds</h2>
@@ -898,7 +1644,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 7: TEST GROUND & OFFICE MAP                         -->
       <!-- ======================================================== -->
-      <section id="view-map" class="app-view hidden">
+      <section id="view-map" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>Interactive RTO & Test Grounds Geospatial Map</h2>
@@ -928,7 +1674,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 8: VEHICLE ANALYSIS                                 -->
       <!-- ======================================================== -->
-      <section id="view-vehicles" class="app-view hidden">
+      <section id="view-vehicles" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>Department Vehicle Fleet & Age Analytics</h2>
@@ -1036,7 +1782,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 9: FINANCIAL DUES                                   -->
       <!-- ======================================================== -->
-      <section id="view-finances" class="app-view hidden">
+      <section id="view-finances" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>Financial Dues & Pending Liabilities Dashboard</h2>
@@ -1117,7 +1863,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 9B: IT INVENTORY & DIGITAL ASSETS                   -->
       <!-- ======================================================== -->
-      <section id="view-itinventory" class="app-view hidden">
+      <section id="view-itinventory" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>State-Wide IT Inventory & Digital Assets Registry</h2>
@@ -1225,7 +1971,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 10: CRITICAL PENDENCY & REMARKS                     -->
       <!-- ======================================================== -->
-      <section id="view-pendency" class="app-view hidden">
+      <section id="view-pendency" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>Critical Pendency & Field Remarks Intelligence</h2>
@@ -1257,7 +2003,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 11: OFFICE COMPARISON                               -->
       <!-- ======================================================== -->
-      <section id="view-comparison" class="app-view hidden">
+      <section id="view-comparison" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>Multi-Office Side-by-Side Comparative Matrix</h2>
@@ -1280,7 +2026,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 12: REPORTS & EXPORT                                -->
       <!-- ======================================================== -->
-      <section id="view-reports" class="app-view hidden">
+      <section id="view-reports" class="admin-tab-panel hidden">
         <div class="section-header">
           <div>
             <h2>Executive Reports & Dossier Export Center</h2>
@@ -1335,188 +2081,7 @@
       <!-- ======================================================== -->
       <!-- VIEW 12: Admin Studio (Dynamic CMS for Modules, Menus & Fields) -->
       <!-- ======================================================== -->
-      <section class="app-view hidden" id="view-admin">
-        <div class="view-header-row">
-          <div>
-            <h2 class="view-title"><i class="fa-solid fa-sliders text-warning"></i> Admin Studio</h2>
-            <p class="view-subtitle">Manage Regional Transport Offices, edit survey data, configure administrative Modules, and define granular form Fields.</p>
-          </div>
-          <div class="view-header-actions">
-            <button class="btn btn-outline btn-sm" onclick="window.RTO_APP.refreshData()">
-              <i class="fa-solid fa-rotate"></i> Refresh DB
-            </button>
-            <button class="btn btn-primary btn-sm" onclick="window.RTO_APP.openAddOfficeModal()" id="btn-admin-add-office">
-              <i class="fa-solid fa-plus"></i> Add New Office
-            </button>
-          </div>
-        </div>
 
-        <!-- Studio Sub-Navigation Tabs -->
-        <div class="admin-mode-tabs-bar">
-          <button type="button" class="admin-mode-tab-btn active" id="tab-btn-admin-offices" onclick="window.RTO_APP.switchAdminStudioTab('offices')">
-            <i class="fa-solid fa-building-flag"></i> Office Management (<span id="admin-office-count-badge">100</span>)
-          </button>
-          <button type="button" class="admin-mode-tab-btn" id="tab-btn-admin-schema" onclick="window.RTO_APP.switchAdminStudioTab('schema')">
-            <i class="fa-solid fa-sliders"></i> Schema &amp; Hierarchy Builder
-          </button>
-        </div>
-
-        <!-- TAB 1: Office Management Panel -->
-        <div id="admin-studio-offices-panel">
-          <div class="admin-office-toolbar">
-            <div class="search-box flex-grow">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="admin-offices-search-input" class="form-control" placeholder="Search office name, district, or code..." oninput="window.RTO_APP.renderAdminOfficesTable()">
-            </div>
-            <div class="filter-select-group">
-              <select id="admin-offices-district-filter" class="form-control" onchange="window.RTO_APP.renderAdminOfficesTable()">
-                <option value="">All Districts (14)</option>
-              </select>
-            </div>
-            <div class="filter-select-group">
-              <select id="admin-offices-building-filter" class="form-control" onchange="window.RTO_APP.renderAdminOfficesTable()">
-                <option value="">All Building Types</option>
-                <option value="Government Building">Government Building</option>
-                <option value="Rented">Rented</option>
-              </select>
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="window.RTO_APP.openAddOfficeModal()">
-              <i class="fa-solid fa-plus"></i> New Office
-            </button>
-          </div>
-
-          <div class="table-container mt-3">
-            <table class="data-table" id="admin-offices-table">
-              <thead>
-                <tr>
-                  <th style="width: 40px;">#</th>
-                  <th>Office Name</th>
-                  <th>District</th>
-                  <th>Building & Area</th>
-                  <th>RTO / JRTO Incharge</th>
-                  <th>Staff (San/Avail)</th>
-                  <th>Vehicles</th>
-                  <th>Rent & Liabilities</th>
-                  <th style="text-align: right; min-width: 170px;">Admin Actions</th>
-                </tr>
-              </thead>
-              <tbody id="admin-offices-tbody">
-                <!-- Dynamically populated rows with Edit and Delete buttons -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- TAB 2: Schema & CMS Builder Panel -->
-        <div id="admin-studio-schema-panel" class="hidden">
-          <!-- Admin Studio KPI Stats Bar -->
-          <div class="admin-stats-bar">
-            <div class="admin-stat-chip">
-              <div class="chip-icon bg-blue-subtle text-primary"><i class="fa-solid fa-cubes"></i></div>
-              <div class="chip-details">
-                <span class="stat-number" id="stat-total-modules">5</span>
-                <span class="stat-label">Modules</span>
-              </div>
-            </div>
-            <div class="admin-stat-chip">
-              <div class="chip-icon bg-gold-subtle text-warning"><i class="fa-solid fa-list-check"></i></div>
-              <div class="chip-details">
-                <span class="stat-number" id="stat-total-menus">11</span>
-                <span class="stat-label">Sub-Menus</span>
-              </div>
-            </div>
-            <div class="admin-stat-chip">
-              <div class="chip-icon bg-emerald-subtle text-success"><i class="fa-solid fa-pen-ruler"></i></div>
-              <div class="chip-details">
-                <span class="stat-number" id="stat-total-fields">62</span>
-                <span class="stat-label">Dynamic Fields</span>
-              </div>
-            </div>
-            <div class="admin-stat-chip flex-grow">
-              <div class="chip-icon bg-purple-subtle text-purple"><i class="fa-solid fa-diagram-project"></i></div>
-              <div class="hierarchy-breadcrumb-box">
-                <span class="stat-label">ACTIVE DRILLDOWN:</span>
-                <span class="hierarchy-crumb" id="admin-crumb-trail">All Modules &gt; Select a Menu</span>
-              </div>
-            </div>
-          </div>
-
-        <!-- 3-Column Studio Hierarchy Workbench -->
-        <div class="admin-workbench-grid">
-          
-          <!-- Column 1: Modules Management -->
-          <div class="workbench-col" id="col-modules">
-            <div class="workbench-col-header">
-              <div class="col-title-group">
-                <i class="fa-solid fa-cubes text-primary"></i>
-                <div>
-                  <h4 class="col-title">1. Modules</h4>
-                  <span class="col-subtitle">Parent domains</span>
-                </div>
-              </div>
-              <button class="btn btn-xs btn-primary" onclick="window.RTO_APP.openModuleModal()" title="Add New Module">
-                <i class="fa-solid fa-plus"></i> Add Module
-              </button>
-            </div>
-            <div class="workbench-col-body" id="modules-list-container">
-              <!-- Dynamically populated module cards -->
-              <div class="loading-placeholder"><i class="fa-solid fa-spinner fa-spin"></i> Loading modules...</div>
-            </div>
-          </div>
-
-          <!-- Column 2: Menus Management -->
-          <div class="workbench-col" id="col-menus">
-            <div class="workbench-col-header">
-              <div class="col-title-group">
-                <i class="fa-solid fa-list-check text-warning"></i>
-                <div>
-                  <h4 class="col-title" id="menus-col-heading">2. Menus</h4>
-                  <span class="col-subtitle" id="menus-col-subheading">Select a module</span>
-                </div>
-              </div>
-              <button class="btn btn-xs btn-primary" id="btn-add-menu-action" onclick="window.RTO_APP.openMenuModal()" title="Add Menu under this Module">
-                <i class="fa-solid fa-plus"></i> Add Menu
-              </button>
-            </div>
-            <div class="workbench-col-body" id="menus-list-container">
-              <!-- Dynamically populated menu cards -->
-              <div class="empty-workbench-notice">
-                <i class="fa-solid fa-arrow-left"></i>
-                <p>Select a Module to view & manage its Menus</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Column 3: Fields Management -->
-          <div class="workbench-col flex-2" id="col-fields">
-            <div class="workbench-col-header">
-              <div class="col-title-group">
-                <i class="fa-solid fa-pen-ruler text-success"></i>
-                <div>
-                  <h4 class="col-title" id="fields-col-heading">3. Fields</h4>
-                  <span class="col-subtitle" id="fields-col-subheading">Select a menu</span>
-                </div>
-              </div>
-              <div class="header-action-group">
-                <button class="btn btn-xs btn-outline" id="btn-preview-form-action" onclick="window.RTO_APP.previewCurrentMenuForm()" title="Live Form Interactive Preview">
-                  <i class="fa-solid fa-eye"></i> Preview Form
-                </button>
-                <button class="btn btn-xs btn-primary" id="btn-add-field-action" onclick="window.RTO_APP.openFieldModal()" title="Add Field under this Menu">
-                  <i class="fa-solid fa-plus"></i> Add Field
-                </button>
-              </div>
-            </div>
-            <div class="workbench-col-body" id="fields-list-container">
-              <!-- Dynamically populated field cards -->
-              <div class="empty-workbench-notice">
-                <i class="fa-solid fa-arrow-left"></i>
-                <p>Select a Menu to view, add, or customize its Fields</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-        </div>
       </section>
 
       <!-- Official Portal Footer -->

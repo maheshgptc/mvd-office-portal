@@ -348,19 +348,51 @@ class RTOApp {
       this.navigateTo('dashboard');
       return;
     }
-    if (viewId === 'admin' && !this.adminSession) {
-      this.openAdminLoginModal();
+
+    const adminTabs = [
+      'admin', 'offices', 'districts', 'directory', 'profile',
+      'manpower', 'testgrounds', 'map', 'vehicles', 'finances',
+      'itinventory', 'pendency', 'comparison', 'reports', 'schema'
+    ];
+
+    if (viewId === 'admin' || adminTabs.includes(viewId)) {
+      if (!this.adminSession) {
+        this.pendingAdminView = viewId === 'admin' ? 'offices' : viewId;
+        this.openAdminLoginModal();
+        return;
+      }
+
+      this.currentView = 'admin';
+
+      // Update sidebar active status
+      document.querySelectorAll('.sidebar-nav-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.view === 'admin');
+      });
+
+      // Show Admin Studio shell
+      document.querySelectorAll('.app-view').forEach(viewEl => {
+        viewEl.classList.add('hidden');
+      });
+      const adminViewEl = document.getElementById('view-admin');
+      if (adminViewEl) adminViewEl.classList.remove('hidden');
+
+      const targetTab = viewId === 'admin' ? (this.adminStudioActiveTab || 'offices') : viewId;
+      this.switchAdminStudioTab(targetTab);
+      this.updateBreadcrumbs();
+
+      document.body.classList.remove('sidebar-open');
+      document.body.classList.remove('sidebar-collapsed');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
+    // Public Dashboard view
     this.currentView = viewId;
 
-    // Update sidebar navigation active item
     document.querySelectorAll('.sidebar-nav-item').forEach(el => {
       el.classList.toggle('active', el.dataset.view === viewId);
     });
 
-    // Show/hide view sections
     document.querySelectorAll('.app-view').forEach(viewEl => {
       viewEl.classList.add('hidden');
     });
@@ -373,7 +405,6 @@ class RTOApp {
     this.updateBreadcrumbs();
     this.renderCurrentView();
 
-    // Close mobile sidebar drawer if open
     document.body.classList.remove('sidebar-open');
     document.body.classList.remove('sidebar-collapsed');
 
@@ -391,6 +422,11 @@ class RTOApp {
     if (!bc) return;
 
     let html = `<li class="breadcrumb-item"><a href="#" onclick="window.RTO_APP.navigateTo('dashboard'); return false;"><i class="fa-solid fa-gauge-high"></i> State Command</a></li>`;
+    if (this.currentView === 'survey') {
+      html += `<li class="breadcrumb-item active"><i class="fa-solid fa-file-pen"></i> Office Survey Entry Portal</li>`;
+      bc.innerHTML = html;
+      return;
+    }
 
     if (this.currentView === 'districts') {
       html += `<li class="breadcrumb-item active">District Analysis</li>`;
@@ -1998,7 +2034,9 @@ class RTOApp {
         localStorage.setItem('rto_admin_session', JSON.stringify(res.user));
         this.closeModal('modal-admin-login');
         this.updateAdminUI();
-        this.navigateTo('admin');
+        const targetView = this.pendingAdminView || 'admin';
+        this.pendingAdminView = null;
+        this.navigateTo(targetView);
       } else {
         if (alertBox) {
           alertBox.textContent = res.error || 'Authentication failed. Please verify credentials.';
@@ -2105,23 +2143,76 @@ class RTOApp {
 
   switchAdminStudioTab(tab) {
     this.adminStudioActiveTab = tab;
-    const officesTabBtn = document.getElementById('tab-btn-admin-offices');
-    const schemaTabBtn = document.getElementById('tab-btn-admin-schema');
-    const officesPanel = document.getElementById('admin-studio-offices-panel');
-    const schemaPanel = document.getElementById('admin-studio-schema-panel');
 
-    if (tab === 'offices') {
-      if (officesTabBtn) officesTabBtn.classList.add('active');
-      if (schemaTabBtn) schemaTabBtn.classList.remove('active');
-      if (officesPanel) officesPanel.classList.remove('hidden');
-      if (schemaPanel) schemaPanel.classList.add('hidden');
-      this.renderAdminOfficesTable();
-    } else {
-      if (officesTabBtn) officesTabBtn.classList.remove('active');
-      if (schemaTabBtn) schemaTabBtn.classList.add('active');
-      if (officesPanel) officesPanel.classList.add('hidden');
-      if (schemaPanel) schemaPanel.classList.remove('hidden');
+    // Update active tab button
+    document.querySelectorAll('.admin-mode-tab-btn').forEach(btn => {
+      const isTarget = btn.id === `tab-btn-admin-${tab}` || btn.dataset.tab === tab;
+      btn.classList.toggle('active', isTarget);
+    });
+
+    // Hide all admin tab panels
+    document.querySelectorAll('.admin-tab-panel').forEach(p => {
+      p.classList.add('hidden');
+    });
+
+    // Show target panel
+    const targetPanel = document.getElementById(`admin-studio-${tab}-panel`) || 
+                        document.getElementById(`view-${tab}`) ||
+                        document.getElementById(`admin-panel-${tab}`);
+    if (targetPanel) {
+      targetPanel.classList.remove('hidden');
     }
+
+    // Trigger proper view render function
+    switch (tab) {
+      case 'offices':
+        this.renderAdminOfficesTable();
+        break;
+      case 'districts':
+        this.renderDistrictsView();
+        break;
+      case 'directory':
+        this.renderDirectoryView();
+        break;
+      case 'profile':
+        this.renderProfileView();
+        break;
+      case 'manpower':
+        this.renderManpowerView();
+        break;
+      case 'testgrounds':
+        this.renderTestGroundsView();
+        break;
+      case 'map':
+        this.renderMapView();
+        if (this.map && typeof this.map.invalidateSize === 'function') {
+          setTimeout(() => this.map.invalidateSize(), 150);
+        }
+        break;
+      case 'vehicles':
+        this.renderVehiclesView();
+        break;
+      case 'finances':
+        this.renderFinancesView();
+        break;
+      case 'itinventory':
+        this.renderItInventoryView();
+        break;
+      case 'pendency':
+        this.renderPendencyView();
+        break;
+      case 'comparison':
+        this.renderComparisonView();
+        break;
+      case 'reports':
+        this.renderReportsView();
+        break;
+      case 'schema':
+        // Schema builder is already active
+        break;
+    }
+
+    this.updateBreadcrumbs();
   }
 
   populateAdminDistrictFilter() {
@@ -3369,6 +3460,7 @@ class RTOApp {
       // Refresh local cache and trigger UI re-renders
       this.allOffices = this.supabaseService.data.offices;
       this.applyFilters();
+      this.populateSurveyPrefillDropdown();
 
       this.closeModal('modal-edit-office');
 
@@ -3398,7 +3490,188 @@ class RTOApp {
     }
   }
 
-    setElText(id, text) {
+  
+  // =========================================================================
+  // PUBLIC SURVEY DATA ENTRY FORM CONTROLLER
+  // =========================================================================
+  currentSurveyStep = 1;
+
+  switchSurveyStep(step) {
+    this.currentSurveyStep = step;
+    
+    // Toggle step buttons
+    document.querySelectorAll('.survey-step-btn').forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.step, 10) === step);
+    });
+
+    // Toggle panels
+    for (let i = 1; i <= 6; i++) {
+      const panel = document.getElementById(`survey-step-${i}`);
+      if (panel) {
+        panel.classList.toggle('hidden', i !== step);
+      }
+    }
+
+    // Toggle nav buttons
+    const prevBtn = document.getElementById('btn-survey-prev');
+    const nextBtn = document.getElementById('btn-survey-next');
+    if (prevBtn) prevBtn.style.display = step > 1 ? 'inline-flex' : 'none';
+    if (nextBtn) nextBtn.style.display = step < 6 ? 'inline-flex' : 'none';
+
+    window.scrollTo({ top: 120, behavior: 'smooth' });
+  }
+
+  handleSurveyStepNav(delta) {
+    let next = this.currentSurveyStep + delta;
+    if (next < 1) next = 1;
+    if (next > 6) next = 6;
+    this.switchSurveyStep(next);
+  }
+
+  populateSurveyPrefillDropdown() {
+    const sel = document.getElementById('survey-prefill-select');
+    if (!sel) return;
+    const sorted = [...this.allOffices].sort((a, b) => (a.officeName || '').localeCompare(b.officeName || ''));
+    sel.innerHTML = '<option value="">-- Start Fresh Form (Blank) --</option>' +
+      sorted.map(o => `<option value="${o.id}">${o.officeName} (${o.district})</option>`).join('');
+  }
+
+  async handleSurveyPrefill(officeId) {
+    if (!officeId) {
+      this.resetPublicSurveyForm();
+      return;
+    }
+
+    const office = this.allOffices.find(o => o.id === officeId);
+    if (!office) return;
+
+    // Set hidden ID
+    const hiddenIdEl = document.getElementById('survey-office-id');
+    if (hiddenIdEl) hiddenIdEl.value = office.id;
+
+    // Prefill all inputs
+    const inputs = document.querySelectorAll('#public-survey-form [data-key]');
+    inputs.forEach(input => {
+      const key = input.dataset.key;
+      const type = input.dataset.type;
+      const val = this.getOfficeDbValue(office, key);
+
+      if (type === 'boolean') {
+        input.checked = val === true || val === 'true' || val === 1 || String(val).toLowerCase() === 'yes';
+      } else {
+        input.value = (val !== null && val !== undefined) ? val : '';
+      }
+    });
+
+    alert(`Loaded existing data for "${office.officeName}". You can now review, update, or submit changes.`);
+  }
+
+  handleGpsAutoFill(inputEl, latId, lngId) {
+    if (!inputEl || !inputEl.value) return;
+    const coords = DataAdapter.extractCoordinates(inputEl.value);
+    if (coords && coords.valid) {
+      const latEl = document.getElementById(latId);
+      const lngEl = document.getElementById(lngId);
+      if (latEl && (!latEl.value || latEl.value === '0')) latEl.value = coords.lat;
+      if (lngEl && (!lngEl.value || lngEl.value === '0')) lngEl.value = coords.lng;
+    }
+  }
+
+  resetPublicSurveyForm() {
+    const form = document.getElementById('public-survey-form');
+    if (form) form.reset();
+    const hiddenId = document.getElementById('survey-office-id');
+    if (hiddenId) hiddenId.value = '';
+    const prefillSel = document.getElementById('survey-prefill-select');
+    if (prefillSel) prefillSel.value = '';
+    this.switchSurveyStep(1);
+  }
+
+  async handlePublicSurveySubmit(event) {
+    if (event) event.preventDefault();
+
+    const district = document.getElementById('survey-district')?.value.trim();
+    const officeName = document.getElementById('survey-office_name')?.value.trim();
+
+    if (!district || !officeName) {
+      alert('Please fill in required fields: District and Office Name (in Step 1).');
+      this.switchSurveyStep(1);
+      return;
+    }
+
+    const submitBtn = document.getElementById('btn-submit-public-survey');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting to Supabase Live DB...';
+    }
+
+    try {
+      const existingId = document.getElementById('survey-office-id')?.value.trim();
+      const inputs = document.querySelectorAll('#public-survey-form [data-key]');
+      const recordPayload = {};
+
+      inputs.forEach(input => {
+        const key = input.dataset.key;
+        const type = input.dataset.type;
+        let val;
+
+        if (type === 'boolean') {
+          val = input.checked;
+        } else if (type === 'number' || type === 'currency') {
+          val = input.value === '' ? null : (parseFloat(input.value) || 0);
+        } else {
+          val = input.value.trim() === '' ? null : input.value.trim();
+        }
+
+        recordPayload[key] = val;
+      });
+
+      // Ensure GPS extraction
+      if (recordPayload.office_gps_raw && (!recordPayload.office_latitude || !recordPayload.office_longitude)) {
+        const c = DataAdapter.extractCoordinates(recordPayload.office_gps_raw);
+        if (c.valid) {
+          recordPayload.office_latitude = c.lat;
+          recordPayload.office_longitude = c.lng;
+        }
+      }
+
+      let resultRecord;
+      if (existingId) {
+        // Update existing row
+        resultRecord = await this.supabaseService.updateOffice(existingId, recordPayload);
+      } else {
+        // Create new row
+        const newId = `office-${Date.now()}-${district.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${officeName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+        const newRecord = {
+          ...recordPayload,
+          id: newId,
+          timestamp: new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        };
+        resultRecord = await this.supabaseService.createOffice(newRecord);
+      }
+
+      // Refresh local offices
+      this.allOffices = this.supabaseService.data.offices;
+      this.applyFilters();
+      this.populateSurveyPrefillDropdown();
+
+      alert(`✓ Survey for "${officeName}" successfully synchronized to Supabase live database!`);
+      
+      this.resetPublicSurveyForm();
+      this.navigateTo('dashboard');
+
+    } catch (err) {
+      console.error('Failed to submit survey:', err);
+      alert(`Submission error: ${err.message}`);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Submit Office Survey to Supabase';
+      }
+    }
+  }
+
+  setElText(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text !== null && text !== undefined ? text : '—';
   }
