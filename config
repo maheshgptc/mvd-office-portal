@@ -1,0 +1,13 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[user]
+	name = maheshgptc
+	email = maheshgptc@gmail.com
+[remote "origin"]
+	url = https://github.com/maheshgptc/mvd-office-portal.git
+	fetch = +refs/heads/*:refs/remotes/origin/*

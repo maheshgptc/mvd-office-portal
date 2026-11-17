@@ -107,11 +107,11 @@
           <i class="fa-solid fa-map-location-dot"></i>
           <span>District Analysis</span>
         </a>
-        <a href="#directory" class="sidebar-nav-item" data-view="directory">
+        <a href="#directory" class="sidebar-nav-item hidden" data-view="directory" style="display: none !important;">
           <i class="fa-solid fa-building-flag"></i>
           <span>Office Directory</span>
         </a>
-        <a href="#profile" class="sidebar-nav-item" data-view="profile">
+        <a href="#profile" class="sidebar-nav-item hidden" data-view="profile" style="display: none !important;">
           <i class="fa-solid fa-id-badge"></i>
           <span>Office Profile</span>
         </a>
@@ -1483,39 +1483,19 @@
       </div>
       <div class="modal-body">
         <div class="login-banner">
-          <i class="fa-solid fa-lock-open text-primary"></i>
-          <p>Sign in to enter <strong>Admin Studio</strong> to add or modify Modules, Menus, and dynamic Form Fields.</p>
-        </div>
-
-        <!-- Quick 1-Click Demo Profiles -->
-        <div class="quick-login-section">
-          <label class="form-label-subtle">Quick Sign-in (Official Profiles):</label>
-          <div class="quick-credentials-grid">
-            <button type="button" class="btn-quick-cred" onclick="window.RTO_APP.fillAdminCredentials('tc.mvd@kerala.gov.in', 'Admin@123')">
-              <span class="cred-role">Transport Commissioner</span>
-              <span class="cred-email">tc.mvd@kerala.gov.in</span>
-            </button>
-            <button type="button" class="btn-quick-cred" onclick="window.RTO_APP.fillAdminCredentials('dtc.south@kerala.gov.in', 'Admin@123')">
-              <span class="cred-role">DTC South Zone</span>
-              <span class="cred-email">dtc.south@kerala.gov.in</span>
-            </button>
-            <button type="button" class="btn-quick-cred" onclick="window.RTO_APP.fillAdminCredentials('rto.tvm@kerala.gov.in', 'Admin@123')">
-              <span class="cred-role">RTO Thiruvananthapuram</span>
-              <span class="cred-email">rto.tvm@kerala.gov.in</span>
-            </button>
-          </div>
+          <i class="fa-solid fa-lock text-primary"></i>
+          <p>Please enter administrator credentials to access <strong>Admin Studio</strong>.</p>
         </div>
 
         <form id="admin-login-form" onsubmit="window.RTO_APP.handleAdminLogin(event)">
           <div class="form-group mt-3">
-            <label for="admin-login-email"><i class="fa-solid fa-envelope"></i> Official Email ID</label>
-            <input type="text" id="admin-login-email" class="form-control" placeholder="e.g. tc.mvd@kerala.gov.in" value="tc.mvd@kerala.gov.in" required>
+            <label for="admin-login-email"><i class="fa-solid fa-user-shield"></i> Username / Email</label>
+            <input type="text" id="admin-login-email" class="form-control" placeholder="Enter username or email" value="" required autocomplete="username">
           </div>
 
           <div class="form-group mt-2">
             <label for="admin-login-password"><i class="fa-solid fa-key"></i> Administrator Password</label>
-            <input type="password" id="admin-login-password" class="form-control" placeholder="Enter password" value="Admin@123" required>
-            <span class="text-xs text-muted">Default access key is <code>Admin@123</code></span>
+            <input type="password" id="admin-login-password" class="form-control" placeholder="Enter password" value="" required autocomplete="current-password">
           </div>
 
           <div id="admin-login-alert" class="alert-box alert-danger hidden mt-2"></div>
@@ -1990,7 +1970,7 @@
       <i class="fa-solid fa-chart-pie"></i>
       <span>Overview</span>
     </button>
-    <button class="mobile-nav-btn" data-view="directory" onclick="window.RTO_APP.navigateTo('directory')" title="Office Directory">
+    <button class="mobile-nav-btn hidden" data-view="directory" onclick="window.RTO_APP.navigateTo('directory')" title="Office Directory" style="display: none !important;">
       <i class="fa-solid fa-building-flag"></i>
       <span>Directory</span>
     </button>

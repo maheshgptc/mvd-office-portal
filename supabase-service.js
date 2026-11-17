@@ -568,13 +568,31 @@ class SupabaseService {
      ========================================================================= */
 
   /**
-   * Verify Admin Credentials against portal_users or master admin fallback
+   * Verify Admin Credentials
    */
   async verifyAdminLogin(email, password) {
     if (!this.client) this.initClient();
     
     const trimmedEmail = (email || '').trim().toLowerCase();
     const trimmedPass = (password || '').trim();
+
+    // Required Admin Credentials
+    if (
+      (trimmedEmail === 'mvdaicell@gmail.com' || trimmedEmail === 'mvdaicell') &&
+      trimmedPass === 'A!ce//@2026'
+    ) {
+      return {
+        success: true,
+        user: {
+          id: 'usr_mvdaicell',
+          email: 'mvdaicell@gmail.com',
+          full_name: 'MVD AI Cell Administrator',
+          role: 'super_admin',
+          designation: 'State Administrator',
+          district: 'Statewide'
+        }
+      };
+    }
 
     try {
       if (this.client) {
@@ -585,7 +603,7 @@ class SupabaseService {
           .maybeSingle();
 
         if (!error && data) {
-          if (data.password === trimmedPass || (!data.password && trimmedPass === 'Admin@123')) {
+          if (data.password === trimmedPass) {
             const user = { ...data };
             delete user.password;
             return { success: true, user };
@@ -598,25 +616,7 @@ class SupabaseService {
       console.warn('Database user check failed, using fallback check:', e);
     }
 
-    // Master fallback credentials for testing / administrative emergency
-    if (
-      (trimmedEmail === 'admin' || trimmedEmail === 'admin@kerala.gov.in' || trimmedEmail === 'tc.mvd@kerala.gov.in') &&
-      trimmedPass === 'Admin@123'
-    ) {
-      return {
-        success: true,
-        user: {
-          id: 'usr_tc',
-          email: 'tc.mvd@kerala.gov.in',
-          full_name: 'Transport Commissioner',
-          role: 'super_admin',
-          designation: 'Transport Commissioner Kerala',
-          district: 'Statewide'
-        }
-      };
-    }
-
-    return { success: false, error: 'Invalid email or password. Please use Admin@123.' };
+    return { success: false, error: 'Invalid username or password. Access denied.' };
   }
 
   // --- MODULES CRUD ---
